@@ -11,7 +11,7 @@ export async function POST(request) {
         // Extract form data
         const name = formData.get('name');
         const email = formData.get('email');
-        const resume = formData.get('resume');
+        const resume = formData.get('resume');   
         const jobId = formData.get('jobId');
         const phone = formData.get('phone');
         const message = formData.get('message');
