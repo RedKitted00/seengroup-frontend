@@ -1,0 +1,110 @@
+@media screen and (max-width: 2500px) {
+    .menu {
+        padding-left: 70px;
+    }
+    .other-menu {
+        padding-right: 70px;
+    }
+}
+
+
+@media screen and (max-width: 625px) {
+    #site-logo {
+        width: 135px;
+        margin: auto;
+        margin-top: 25px;
+    }
+
+    .xsm\:gap-20 {
+        gap: 40px !important;
+    }
+}
+
+
+@media screen and (max-width: 425px) {
+    #site-logo {
+        width: 120px;
+        margin: 25px auto auto;
+    }
+    .xsm\:gap-20 {
+        gap: 25px !important;
+    }
+}
+
+/* .main-field {
+    padding-top: 140px;
+} */
+
+/* Logo Animation Fallbacks and Enhancements */
+.logo-field {
+    /* Ensure logo is always visible as fallback */
+    opacity: 1 !important;
+    transition: opacity 0.3s ease;
+}
+
+/* Pre-animation state - hide logo initially on homepage */
+.pre-anim .logo-field {
+    opacity: 0;
+}
+
+/* Fallback for when JavaScript fails */
+.no-js .logo-field {
+    opacity: 1 !important;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .logo-field {
+        transition: none !important;
+        animation: none !important;
+    }
+    
+    .pre-anim .logo-field {
+        opacity: 1 !important;
+    }
+}
+
+/* Performance optimizations for logo animation */
+.logo-field {
+    will-change: transform, opacity;
+    transform: translateZ(0); /* Force hardware acceleration */
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Ensure logo is visible on slow connections or when animation fails */
+.logo-field[style*="opacity: 0"] {
+    opacity: 1 !important;
+}
+
+/* Fallback for browsers that don't support certain CSS features */
+@supports not (will-change: transform) {
+    .logo-field {
+        transform: translateZ(0);
+    }
+}
+
+/* Ensure proper z-index stacking */
+.logo-field {
+    position: relative;
+    z-index: 1;
+}
+
+/* Animation state classes for debugging */
+.logo-animating .logo-field {
+    pointer-events: none;
+}
+
+.logo-animation-complete .logo-field {
+    pointer-events: auto;
+}
+
+/* Error state - ensure logo is always visible */
+.logo-animation-error .logo-field {
+    opacity: 1 !important;
+    transform: none !important;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    z-index: auto !important;
+}

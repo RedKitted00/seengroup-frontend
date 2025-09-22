@@ -1,0 +1,2598 @@
+/* Lead Generation Form Styles */
+:root {
+    --primary-color: #6A89A7;
+    --primary-light: #3a5e83;
+    --primary-dark: #2d3a47;
+    --accent-color: #6A89A7;
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F8F9FA;
+    --bg-tertiary: #F2F2F2;
+    --text-primary: #384959;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+    --border-color: #E5E7EB;
+    --border-focus: #6A89A7;
+    --error-color: #EF4444;
+    --success-color: #6A89A7;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Lead Generation Form Container */
+.seen-contact-form-container {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(248, 249, 250, 0.85) 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+    position: relative;
+    transition: opacity 0.3s ease;
+}
+
+/* Loading state - show form immediately */
+.seen-contact-form-container.background-loading {
+    opacity: 1;
+}
+
+/* Loaded state - smooth transition */
+.seen-contact-form-container.background-loaded {
+    opacity: 1;
+}
+
+/* Background Image Container */
+.seen-contact-background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.seen-contact-bg-img {
+    object-fit: cover;
+    object-position: center center;
+    /* Performance optimizations */
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    /* Image loading optimization */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+/* Show background when loaded */
+.seen-contact-form-container.background-loaded .seen-contact-background-image {
+    opacity: 1;
+}
+
+/* Fallback background while loading */
+.seen-contact-form-container.background-loading {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Fallback background image if Next.js Image fails */
+.seen-contact-background-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #6A89A7 0%, #3a5e83 100%);
+    z-index: -1;
+}
+
+.seen-contact-form-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.seen-contact-form-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.seen-contact-form-subtitle {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.seen-contact-form-card {
+    background: #ffffff00;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    padding: 2.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Form Sections */
+.seen-contact-form-section {
+    margin-bottom: 2.5rem;
+}
+
+.seen-contact-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.seen-contact-section-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: var(--bg-tertiary);
+    border-radius: 0.5rem;
+    border-left: 3px solid var(--accent-color);
+}
+
+.seen-contact-section-subtitle small {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.seen-contact-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.seen-contact-form-group {
+    position: relative;
+}
+
+.seen-contact-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+
+/* Form Labels and Inputs */
+.seen-contact-form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Product Integration Styles */
+.seen-contact-product-info {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.seen-contact-product-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.seen-contact-product-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.seen-contact-product-details strong {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.seen-contact-product-details span {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+
+
+/* Single product inquiry styling */
+.seen-contact-requirements-table.single-product {
+    border: 2px solid var(--primary-color);
+    border-radius: 0.5rem;
+    background: rgba(106, 137, 167, 0.02);
+}
+
+.seen-contact-requirements-table tr.pre-filled-product input[readonly] {
+    background-color: rgba(106, 137, 167, 0.05);
+    color: var(--text-primary);
+    font-weight: 500;
+    cursor: not-allowed;
+}
+
+.seen-contact-requirements-table tr.pre-filled-product input[readonly]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(106, 137, 167, 0.1);
+}
+
+/* Responsive product info */
+@media (max-width: 768px) {
+    .seen-contact-product-info {
+        padding: 1rem;
+    }
+    
+    .seen-contact-section-subtitle {
+        font-size: 0.8rem;
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .seen-contact-product-details {
+        gap: 0.25rem;
+    }
+    
+    .seen-contact-product-details strong {
+        font-size: 1rem;
+    }
+    
+    .seen-contact-product-details span {
+        font-size: 0.8rem;
+    }
+}
+
+/* Notification System */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 500;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    max-width: 400px;
+    box-shadow: var(--shadow-lg);
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification-success {
+    background: linear-gradient(135deg, #10B981 0%, #6A89A7 100%);
+}
+
+.notification-error {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+.notification i {
+    margin-right: 0.5rem;
+}
+
+/* Responsive notifications */
+@media (max-width: 768px) {
+    .notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        transform: translateY(-100%);
+    }
+    
+    .notification.show {
+        transform: translateY(0);
+    }
+}
+
+/* Spinner animation for Icon component */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+.seen-contact-form-input,
+.seen-contact-form-select,
+.seen-contact-form-textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    transition: all 0.3s ease;
+}
+
+.seen-contact-form-input:focus,
+.seen-contact-form-select:focus,
+.seen-contact-form-textarea:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(246, 148, 30, 0.1);
+}
+
+.seen-contact-form-input.error,
+.seen-contact-form-select.error,
+.seen-contact-form-textarea.error {
+    border-color: var(--error-color);
+}
+
+.seen-contact-form-select.disabled,
+.seen-contact-form-select:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.7;
+    border-color: var(--border-color);
+}
+
+.seen-contact-form-select.disabled:focus,
+.seen-contact-form-select:disabled:focus {
+    outline: none;
+    border-color: var(--border-color);
+    box-shadow: none;
+}
+
+.seen-contact-error-message {
+    color: var(--error-color);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+.seen-contact-form-hint {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.seen-contact-generate-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.625rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+    margin-left: auto;
+}
+
+.seen-contact-generate-btn:hover {
+    background: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.seen-contact-generate-btn:active {
+    transform: translateY(0);
+}
+
+.seen-contact-error-message.show {
+    display: block;
+}
+
+/* Product Requirements Table */
+.seen-contact-requirements-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: var(--bg-primary);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.seen-contact-requirements-table th {
+    background: var(--bg-tertiary);
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-color);
+    font-size: 0.875rem;
+}
+
+.seen-contact-requirements-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+}
+
+.seen-contact-requirements-table input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    transition: border-color 0.3s ease;
+}
+
+.seen-contact-requirements-table input:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 2px rgba(246, 148, 30, 0.1);
+}
+
+/* Table Buttons - ensure consistency with remove-row-btn */
+.seen-contact-remove-row-btn {
+    background: var(--error-color);
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    /* Ensure consistent icon rendering */
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.seen-contact-remove-row-btn:hover {
+    background: #DC2626;
+    transform: scale(1.05);
+}
+
+/* Ensure consistent icon display across all remove buttons */
+.seen-contact-remove-row-btn svg {
+    display: block !important;
+    width: 14px !important;
+    height: 14px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    /* Force consistent rendering */
+    shape-rendering: geometricPrecision;
+    text-rendering: optimizeLegibility;
+}
+
+.seen-contact-add-row-btn {
+    background: var(--primary-light);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.seen-contact-add-row-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Product Selection Dropdown */
+.product-select-dropdown {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.product-select-dropdown:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(106, 137, 167, 0.1);
+}
+
+.product-select-dropdown:hover {
+    border-color: var(--primary-color);
+}
+
+.product-select-dropdown option {
+    padding: 0.5rem;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* Readonly Input Styling */
+
+
+/* Auto-suggest Dropdown */
+.seen-contact-suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    margin-top: 0.25rem;
+}
+
+.seen-contact-suggestion-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.seen-contact-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.seen-contact-suggestion-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.seen-contact-suggestion-item.selected {
+    background: var(--border-focus);
+    color: white;
+}
+
+.seen-contact-suggestion-item.selected .text-gray-600 {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Submit Button */
+.seen-contact-submit-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.seen-contact-submit-btn:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.seen-contact-submit-btn:disabled {
+    background: var(--text-muted);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Loading State */
+.seen-contact-loading {
+    display: none;
+}
+
+.seen-contact-loading.show {
+    display: inline-block;
+}
+
+/* Success Message */
+.seen-contact-success-message {
+    background: var(--success-color);
+    color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    display: none;
+    animation: slideIn 0.3s ease;
+}
+
+.seen-contact-success-message.show {
+    display: block;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header Styles */
+.seen-contact-header {
+    background: #383838;
+    box-shadow: var(--shadow-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.seen-contact-header .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.seen-contact-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.seen-contact-nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.seen-contact-nav a:hover {
+    color: var(--text-primary);
+}
+
+.seen-contact-nav a.active {
+    color: var(--accent-color);
+}
+
+/* Large Desktop - 1440px and above */
+@media (min-width: 1440px) {
+    .seen-contact-form-container::before {
+        background-size: cover;
+        background-position: center center;
+        background-attachment: fixed;
+    }
+}
+
+/* Desktop - 1025px to 1439px */
+@media (min-width: 1025px) and (max-width: 1439px) {
+    .seen-contact-form-container::before {
+        background-size: cover;
+        background-position: center center;
+        background-attachment: fixed;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .seen-contact-form-card {
+        margin: 0 1rem;
+    }
+    
+    .seen-contact-form-container::before {
+        width: 100vw;
+        height: 100vh;
+        background-size: cover;
+        background-position: center center;
+        background-attachment: scroll; /* Better performance on tablets */
+    }
+}
+
+@media (max-width: 768px) {
+    .seen-contact-form-card {
+        padding: 1.5rem;
+        margin: 0 1rem;
+    }
+
+    .seen-contact-form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .seen-contact-form-title {
+        font-size: 2rem;
+    }
+
+    .seen-contact-requirements-table {
+        font-size: 0.875rem;
+    }
+
+    .seen-contact-requirements-table th,
+    .seen-contact-requirements-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .seen-contact-section-title {
+        font-size: 1.125rem;
+    }
+    
+    .seen-contact-form-container::before {
+        width: 100vw;
+        height: 100vh;
+        background-size: cover;
+        background-position: center center;
+        background-attachment: scroll; /* Better performance on mobile */
+    }
+}
+
+@media (max-width: 640px) {
+    .seen-contact-form-container {
+        padding: 1rem 0;
+    }
+
+    .seen-contact-form-card {
+        padding: 1rem;
+    }
+
+    .seen-contact-form-title {
+        font-size: 1.75rem;
+    }
+
+    .seen-contact-form-subtitle {
+        font-size: 1rem;
+    }
+
+    .seen-contact-requirements-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .seen-contact-requirements-table th,
+    .seen-contact-requirements-table td {
+        min-width: 120px;
+    }
+
+    .seen-contact-requirements-table th:first-child,
+    .seen-contact-requirements-table td:first-child {
+        min-width: 150px;
+    }
+
+    .seen-contact-add-row-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .seen-contact-submit-btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .seen-contact-form-container::before {
+        width: 100vw;
+        height: 100vh;
+        background-size: cover;
+        background-position: center center;
+        background-attachment: scroll; /* Better performance on small mobile */
+    }
+}
+
+/* Extra Small Mobile - 480px and below */
+@media (max-width: 480px) {
+    .seen-contact-form-container::before {
+        width: 100vw;
+        height: 100vh;
+        background-size: cover;
+        background-position: center center;
+        background-attachment: scroll;
+        /* Optimize for very small screens */
+        background-repeat: no-repeat;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .seen-contact-form-container {
+        background: white;
+        padding: 0;
+    }
+
+    .seen-contact-form-card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+
+    .seen-contact-add-row-btn,
+    .seen-contact-remove-row-btn,
+    .seen-contact-submit-btn {
+        display: none;
+    }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus styles for keyboard navigation */
+.seen-contact-form-input:focus-visible,
+.seen-contact-form-select:focus-visible,
+.seen-contact-form-textarea:focus-visible,
+.seen-contact-add-row-btn:focus-visible,
+.seen-contact-submit-btn:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+
+    .seen-contact-form-input,
+    .seen-contact-form-select,
+    .seen-contact-form-textarea {
+        border-width: 2px;
+    }
+
+    .seen-contact-requirements-table {
+        border: 2px solid var(--text-primary);
+    }
+}
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    max-width: 400px;
+    border-left: 4px solid var(--success-color);
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification-success {
+    border-left-color: var(--success-color);
+}
+
+.notification-error {
+    border-left-color: var(--error-color);
+}
+
+.notification i {
+    font-size: 18px;
+    color: var(--success-color);
+}
+
+.notification-error i {
+    color: var(--error-color);
+}
+
+.notification span {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Remove row button styles - ensure consistency */
+.remove-row-btn {
+    background: var(--error-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    /* Ensure consistent icon rendering */
+    line-height: 1;
+    vertical-align: middle;
+    /* Force consistent button appearance */
+    position: relative;
+    overflow: hidden;
+}
+
+.remove-row-btn:hover {
+    background: #DC2626;
+    transform: scale(1.05);
+}
+
+/* Ensure consistent icon display across all remove buttons */
+.remove-row-btn svg {
+    display: block !important;
+    width: 14px !important;
+    height: 14px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    /* Force consistent rendering */
+    shape-rendering: geometricPrecision;
+    text-rendering: optimizeLegibility;
+    /* Ensure all trash icons look identical */
+    vector-effect: non-scaling-stroke;
+    /* Additional consistency rules */
+    dominant-baseline: central;
+    text-anchor: middle;
+}
+
+/* Force all trash icons to be identical */
+.remove-row-btn svg * {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+}
+
+/* Table row animations */
+.requirement-row {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Loading state improvements */
+.seen-contact-loading {
+    display: none;
+    align-items: center;
+    gap: 8px;
+}
+
+.seen-contact-loading.show {
+    display: flex;
+}
+
+.seen-contact-loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+.seen-contact-btn-text {
+    display: flex;
+    gap: 10px;
+    align-items: center
+}
+
+/* Form validation improvements */
+.seen-contact-form-input.error,
+.seen-contact-form-select.error {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.seen-contact-form-input:focus,
+.seen-contact-form-select:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(246, 148, 30, 0.1);
+    outline: none;
+}
+
+/* Disabled button styles */
+.seen-contact-submit-btn:disabled {
+    background: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.seen-contact-submit-btn:disabled:hover {
+    background: var(--text-muted);
+    transform: none;
+}
+
+
+
+/* Ensure consistent icon rendering in pre-filled rows */
+.pre-filled-product .remove-row-btn svg {
+    display: block !important;
+    width: 14px !important;
+    height: 14px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    shape-rendering: geometricPrecision;
+    text-rendering: optimizeLegibility;
+    /* Ensure all trash icons look identical */
+    vector-effect: non-scaling-stroke;
+}
+
+.pre-filled-product input[readonly] {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+/* Error message improvements */
+.seen-contact-error-message {
+    color: var(--error-color);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.seen-contact-error-message::before {
+    content: "⚠️";
+    font-size: 0.75rem;
+}
+
+/* Success message improvements */
+.seen-contact-success-message {
+    background: rgba(106, 137, 167, 0.1);
+    border: 1px solid var(--success-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--success-color);
+    font-weight: 500;
+}
+
+/* Table improvements */
+.seen-contact-requirements-table input,
+.seen-contact-requirements-table select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.seen-contact-requirements-table input:focus,
+.seen-contact-requirements-table select:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 2px rgba(246, 148, 30, 0.1);
+    outline: none;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .seen-contact-form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .seen-contact-requirements-table {
+        font-size: 0.875rem;
+    }
+    
+    .seen-contact-requirements-table th,
+    .seen-contact-requirements-table td {
+        padding: 0.5rem 0.25rem;
+    }
+}
+
+/* Notification System Styles */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+}
+
+.notification {
+    background: white;
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    max-width: 400px;
+    border-left: 4px solid var(--success-color);
+    cursor: pointer;
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification-success {
+    border-left-color: var(--success-color);
+}
+
+.notification-error {
+    border-left-color: var(--error-color);
+}
+
+.notification-info {
+    border-left-color: var(--primary-color);
+}
+
+.notification-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.notification-success .notification-icon {
+    background: rgba(106, 137, 167, 0.1);
+    color: var(--success-color);
+}
+
+.notification-error .notification-icon {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+}
+
+.notification-info .notification-icon {
+    background: rgba(246, 148, 30, 0.1);
+    color: var(--accent-color);
+}
+
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-message {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.notification-close:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* Animation for notifications */
+.notification {
+    animation: slideInRight 0.3s ease forwards;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Mobile responsive notifications */
+@media (max-width: 768px) {
+    .notification-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .notification {
+        max-width: none;
+        padding: 12px 16px;
+    }
+    
+    .notification-message {
+        font-size: 13px;
+    }
+}
+
+/* Office Locations Section Styles */
+.seen-contact-offices-section {
+    margin: clamp(1.5rem, 4vw, 3rem) 0;
+    padding: clamp(1rem, 3vw, 2rem) 0;
+}
+
+.seen-contact-offices-title {
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: clamp(1rem, 3vw, 2rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.5rem, 1.5vw, 0.75rem);
+    text-align: center;
+    line-height: 1.3;
+}
+
+.seen-contact-offices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: clamp(1rem, 2.5vw, 2rem);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 2vw, 2rem);
+    width: 100%;
+}
+
+.seen-contact-office-card {
+    background: rgba(255, 255, 255, 0.103);
+    border-radius: clamp(0.75rem, 2vw, 1rem);
+    padding: clamp(1rem, 2.5vw, 1.5rem);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.seen-contact-office-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    border-radius: 1rem 1rem 0 0;
+}
+
+.seen-contact-office-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-color);
+}
+
+.seen-contact-office-header {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 2vw, 1rem);
+    margin-bottom: clamp(0.75rem, 2vw, 1rem);
+    flex-shrink: 0;
+}
+
+.seen-contact-office-icon {
+    width: clamp(45px, 8vw, 60px);
+    height: clamp(45px, 8vw, 60px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;  
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.seen-contact-office-icon::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+}
+
+.seen-contact-office-card:hover .seen-contact-office-icon::before {
+    animation: shimmer 1.5s ease-in-out;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+}
+
+.seen-contact-globe-icon {
+    width: clamp(28px, 6vw, 40px) !important;
+    height: clamp(28px, 6vw, 40px) !important;
+    object-fit: contain;
+    z-index: 1;
+    position: relative;
+}
+
+.seen-contact-office-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.seen-contact-office-name {
+    font-size: clamp(1rem, 2.5vw, 1.125rem);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 clamp(0.25rem, 0.5vw, 0.25rem) 0;
+    line-height: clamp(1.2, 1.5vw, 1.3);
+    word-wrap: break-word;
+}
+
+.seen-contact-office-country {
+    font-size: clamp(0.8rem, 2vw, 0.875rem);
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.seen-contact-office-address {
+    font-size: clamp(0.75rem, 2vw, 0.875rem);
+    color: var(--text-secondary);
+    line-height: clamp(1.4, 2vw, 1.5);
+    margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+    padding: clamp(0.5rem, 1.5vw, 0.75rem);
+    background: rgba(106, 137, 167, 0.05);
+    border-radius: clamp(0.375rem, 1vw, 0.5rem);
+    border-left: 3px solid var(--primary-color);
+    flex: 1;
+    word-wrap: break-word;
+}
+
+.seen-contact-directions-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.375rem, 1vw, 0.5rem);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    color: white;
+    text-decoration: none;
+    padding: clamp(0.625rem, 1.5vw, 0.75rem) clamp(1rem, 2.5vw, 1.5rem);
+    border-radius: clamp(0.375rem, 1vw, 0.5rem);
+    font-size: clamp(0.8rem, 2vw, 0.875rem);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(106, 137, 167, 0.3);
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin-top: auto;
+    min-height: 44px;
+}
+
+.seen-contact-directions-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.seen-contact-directions-btn:hover::before {
+    left: 100%;
+}
+
+.seen-contact-directions-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(106, 137, 167, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.seen-contact-directions-btn:active {
+    transform: translateY(0);
+}
+
+/* Accessibility Improvements */
+.seen-contact-office-card:focus-within {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-color: var(--primary-color);
+}
+
+.seen-contact-directions-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-color) 100%);
+}
+
+.seen-contact-directions-btn:focus-visible:not(:hover) {
+    transform: none;
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .seen-contact-office-card {
+        transition: none;
+    }
+    
+    .seen-contact-office-card:hover {
+        transform: none;
+    }
+    
+    .seen-contact-office-card:hover .seen-contact-office-icon::before {
+        animation: none;
+    }
+    
+    .seen-contact-directions-btn {
+        transition: none;
+    }
+    
+    .seen-contact-directions-btn:hover {
+        transform: none;
+    }
+    
+    .seen-contact-directions-btn::before {
+        transition: none;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .seen-contact-office-card {
+        border: 2px solid var(--text-primary);
+        background: var(--bg-primary);
+    }
+    
+    .seen-contact-office-address {
+        border-left-width: 4px;
+    }
+    
+    .seen-contact-directions-btn {
+        border: 2px solid var(--primary-color);
+    }
+}
+
+/* Container Queries Support (Modern Browsers) */
+@supports (container-type: inline-size) {
+    .seen-contact-offices-grid {
+        container-type: inline-size;
+    }
+    
+    @container (max-width: 600px) {
+        .seen-contact-office-card {
+            text-align: center;
+        }
+        
+        .seen-contact-office-header {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+}
+
+/* Print Styles */
+@media print {
+    .seen-contact-offices-section {
+        margin: 1rem 0;
+        padding: 0;
+        background: white;
+    }
+    
+    .seen-contact-office-card {
+        background: white;
+        border: 1px solid #ccc;
+        box-shadow: none;
+        break-inside: avoid;
+        margin-bottom: 1rem;
+    }
+    
+    .seen-contact-directions-btn {
+        display: none;
+    }
+}
+
+/* Enhanced Responsive Design for Office Locations */
+
+/* Large Desktop - 1440px and above */
+@media (min-width: 1440px) {
+    .seen-contact-offices-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+        max-width: 1400px;
+    }
+    
+    .seen-contact-office-card {
+        min-height: 220px;
+    }
+}
+
+/* Desktop - 1024px to 1439px */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .seen-contact-offices-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: clamp(1.25rem, 2.5vw, 2rem);
+    }
+}
+
+/* Tablet - 768px to 1023px */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .seen-contact-offices-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: clamp(1rem, 2vw, 1.5rem);
+    }
+    
+    .seen-contact-office-card {
+        min-height: 200px;
+    }
+}
+
+/* Small Tablet - 640px to 767px */
+@media (min-width: 640px) and (max-width: 767px) {
+    .seen-contact-offices-grid {
+        grid-template-columns: 1fr;
+        gap: clamp(0.875rem, 1.5vw, 1.25rem);
+    }
+    
+    .seen-contact-office-card {
+        min-height: 180px;
+    }
+}
+
+/* Mobile - 481px to 639px */
+@media (min-width: 481px) and (max-width: 639px) {
+    .seen-contact-offices-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0 0.75rem;
+    }
+    
+    .seen-contact-office-card {
+        min-height: 160px;
+    }
+}
+
+/* Small Mobile - 480px and below */
+@media (max-width: 480px) {
+    .seen-contact-offices-grid {
+        grid-template-columns: 1fr;
+        gap: 0.875rem;
+        padding: 0 0.5rem;
+    }
+    
+    .seen-contact-office-card {
+        min-height: 150px;
+        padding: 0.875rem;
+    }
+    
+    .seen-contact-office-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .seen-contact-office-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .seen-contact-globe-icon {
+        width: 24px !important;
+        height: 24px !important;
+    }
+    
+    .seen-contact-directions-btn {
+        min-height: 48px;
+        font-size: 0.875rem;
+    }
+}
+
+/* Extra Small Mobile - 360px and below */
+@media (max-width: 360px) {
+    .seen-contact-offices-grid {
+        padding: 0 0.25rem;
+    }
+    
+    .seen-contact-office-card {
+        padding: 0.75rem;
+        min-height: 140px;
+    }
+    
+    .seen-contact-office-icon {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .seen-contact-globe-icon {
+        width: 20px !important;
+        height: 20px !important;
+    }
+}
+
+/* Add Multiple Products Modal Styles */
+.seen-contact-add-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.seen-contact-add-multiple-btn {
+    background: linear-gradient(135deg, #6A89A7 0%, #3a5e83 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.seen-contact-add-multiple-btn:hover {
+    background: linear-gradient(135deg, #3a5e83 0%, #2d3a47 100%);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.seen-contact-add-multiple-btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Modal Overlay */
+.seen-contact-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+/* Modal Container */
+.seen-contact-modal {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Modal Header */
+.seen-contact-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.seen-contact-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.seen-contact-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.seen-contact-modal-close:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* Modal Body */
+.seen-contact-modal-body {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+/* Search Container */
+.seen-contact-search-container {
+    margin-bottom: 20px;
+}
+
+.seen-contact-search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.seen-contact-search-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--text-muted);
+    z-index: 1;
+}
+
+.seen-contact-search-input {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.seen-contact-search-input:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(106, 137, 167, 0.1);
+}
+
+.seen-contact-search-loading {
+    position: absolute;
+    right: 12px;
+    color: var(--text-muted);
+}
+
+.seen-contact-search-hint {
+    margin: 8px 0 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Search Results */
+.seen-contact-search-results {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.seen-contact-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.seen-contact-selected-count {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.seen-contact-results-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.seen-contact-result-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.seen-contact-result-item:last-child {
+    border-bottom: none;
+}
+
+.seen-contact-result-item:hover {
+    background: var(--bg-secondary);
+}
+
+.seen-contact-result-item.selected {
+    background: rgba(106, 137, 167, 0.1);
+    border-left: 3px solid var(--primary-color);
+}
+
+.seen-contact-result-checkbox {
+    margin-right: 12px;
+}
+
+.seen-contact-result-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.seen-contact-result-content {
+    flex: 1;
+}
+
+.seen-contact-result-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.seen-contact-result-details {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+
+.seen-contact-result-part,
+.seen-contact-result-manufacturer {
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.seen-contact-result-price {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* No Results */
+.seen-contact-no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+
+.seen-contact-no-results svg {
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.seen-contact-no-results p {
+    margin: 8px 0;
+}
+
+.seen-contact-no-results-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Modal Footer */
+.seen-contact-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.seen-contact-modal-cancel {
+    background: white;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.seen-contact-modal-cancel:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.seen-contact-modal-add {
+    background: linear-gradient(135deg, #6A89A7 0%, #3a5e83 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.seen-contact-modal-add:hover:not(:disabled) {
+    background: linear-gradient(135deg, #3a5e83 0%, #2d3a47 100%);
+}
+
+.seen-contact-modal-add:disabled {
+    background: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Submit Buttons Container */
+.seen-contact-submit-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Method Hints */
+.seen-contact-method-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(106, 137, 167, 0.1);
+    border: 1px solid rgba(106, 137, 167, 0.2);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    width: 100%;
+    justify-content: center;
+}
+
+.seen-contact-method-hint.seen-contact-recommended {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.2);
+    color: #6A89A7;
+}
+
+.seen-contact-method-hint svg {
+    color: var(--primary-color);
+}
+
+.seen-contact-method-hint.seen-contact-recommended svg {
+    color: #6A89A7;
+}
+
+/* Primary/Secondary Method Styling */
+.seen-contact-primary-method {
+    order: 1;
+    background: linear-gradient(135deg, #6A89A7 0%, #3a5e83 100%);
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 4px 12px rgba(106, 137, 167, 0.3);
+}
+
+.seen-contact-primary-method:hover {
+    background: linear-gradient(135deg, #3a5e83 0%, #2d3a47 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(106, 137, 167, 0.4);
+}
+
+.seen-contact-secondary-method {
+    order: 2;
+    background: white;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+}
+
+.seen-contact-secondary-method:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
+/* Catalog Info in Modal */
+.seen-contact-catalog-info {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.seen-contact-reset-btn {
+    background: white;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.seen-contact-reset-btn:hover:not(:disabled) {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.seen-contact-reset-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+.seen-contact-reset-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Responsive Design */
+
+/* Large Mobile and Small Tablets (768px and below) */
+@media (max-width: 768px) {
+    .seen-contact-modal {
+        margin: 10px;
+        max-height: 95vh;
+    }
+    
+    .seen-contact-modal-header,
+    .seen-contact-modal-body,
+    .seen-contact-modal-footer {
+        padding: 16px;
+    }
+    
+    .seen-contact-add-buttons {
+        flex-direction: column;
+    }
+    
+    .seen-contact-result-details {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .seen-contact-modal-footer {
+        flex-direction: column;
+    }
+    
+    .seen-contact-modal-cancel,
+    .seen-contact-modal-add {
+        width: 100%;
+    }
+    
+    .seen-contact-submit-buttons {
+        flex-direction: column;
+    }
+    
+    .seen-contact-reset-btn {
+        width: 100%;
+    }
+    
+    .seen-contact-primary-method,
+    .seen-contact-secondary-method {
+        order: unset;
+        width: 100%;
+    }
+    
+    .seen-contact-method-hint {
+        text-align: center;
+        font-size: 11px;
+    }
+    
+    .seen-contact-catalog-info {
+        font-size: 12px;
+    }
+}
+
+/* Small Mobile Devices (480px and below) */
+@media (max-width: 480px) {
+    .seen-contact-form-container {
+        padding: 1rem 0;
+    }
+    
+    .seen-contact-form-header {
+        padding: 1.5rem 1rem;
+    }
+    
+    .seen-contact-form-title {
+        font-size: 1.5rem;
+        line-height: 1.3;
+    }
+    
+    .seen-contact-form-subtitle {
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .seen-contact-form-card {
+        margin: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    
+    .seen-contact-form-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .seen-contact-section-title {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .seen-contact-form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .seen-contact-form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .seen-contact-form-input,
+    .seen-contact-form-select,
+    .seen-contact-form-textarea {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        border-radius: 6px;
+    }
+    
+    .seen-contact-requirements-table {
+        font-size: 0.8rem;
+    }
+    
+    .seen-contact-requirements-table th,
+    .seen-contact-requirements-table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .seen-contact-requirements-table input,
+    .seen-contact-requirements-table select {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .seen-contact-add-row-btn,
+    .seen-contact-add-multiple-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .seen-contact-submit-btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .seen-contact-modal {
+        margin: 5px;
+        max-height: 98vh;
+        border-radius: 8px;
+    }
+    
+    .seen-contact-modal-header,
+    .seen-contact-modal-body,
+    .seen-contact-modal-footer {
+        padding: 12px;
+    }
+    
+    .seen-contact-modal-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .seen-contact-search-input {
+        padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .seen-contact-search-icon {
+        left: 10px;
+    }
+    
+    .seen-contact-result-item {
+        padding: 0.75rem;
+    }
+    
+    .seen-contact-result-name {
+        font-size: 0.9rem;
+    }
+    
+    .seen-contact-result-details {
+        font-size: 0.75rem;
+        gap: 6px;
+    }
+    
+    .seen-contact-modal-cancel,
+    .seen-contact-modal-add {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Extra Small Mobile Devices (320px and below) */
+@media (max-width: 320px) {
+    .seen-contact-form-container {
+        padding: 0.5rem 0;
+    }
+    
+    .seen-contact-form-header {
+        padding: 1rem 0.75rem;
+    }
+    
+    .seen-contact-form-title {
+        font-size: 1.25rem;
+        line-height: 1.2;
+    }
+    
+    .seen-contact-form-subtitle {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+    
+    .seen-contact-form-card {
+        margin: 0.5rem;
+        padding: 0.75rem;
+        border-radius: 6px;
+    }
+    
+    .seen-contact-form-section {
+        margin-bottom: 1rem;
+    }
+    
+    .seen-contact-section-title {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .seen-contact-form-group {
+        margin-bottom: 0.75rem;
+    }
+    
+    .seen-contact-form-label {
+        font-size: 0.8rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    .seen-contact-form-input,
+    .seen-contact-form-select,
+    .seen-contact-form-textarea {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+        border-radius: 4px;
+    }
+    
+    .seen-contact-requirements-table {
+        font-size: 0.7rem;
+        border-collapse: collapse;
+    }
+    
+    .seen-contact-requirements-table th,
+    .seen-contact-requirements-table td {
+        padding: 0.4rem 0.2rem;
+        border: 1px solid var(--border-color);
+    }
+    
+    .seen-contact-requirements-table th {
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .seen-contact-requirements-table input,
+    .seen-contact-requirements-table select {
+        padding: 0.4rem;
+        font-size: 0.7rem;
+        border: none;
+        background: transparent;
+        width: 100%;
+    }
+    
+    .seen-contact-requirements-table input:focus,
+    .seen-contact-requirements-table select:focus {
+        outline: 1px solid var(--border-focus);
+        background: white;
+    }
+    
+    .seen-contact-add-row-btn,
+    .seen-contact-add-multiple-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.8rem;
+        border-radius: 4px;
+    }
+    
+    .seen-contact-submit-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+    }
+    
+    .seen-contact-method-hint {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.7rem;
+        border-radius: 4px;
+    }
+    
+    .seen-contact-modal {
+        margin: 2px;
+        max-height: 99vh;
+        border-radius: 6px;
+    }
+    
+    .seen-contact-modal-header,
+    .seen-contact-modal-body,
+    .seen-contact-modal-footer {
+        padding: 8px;
+    }
+    
+    .seen-contact-modal-header h3 {
+        font-size: 1rem;
+    }
+    
+    .seen-contact-catalog-info {
+        font-size: 0.75rem;
+    }
+    
+    .seen-contact-search-input {
+        padding: 0.6rem 0.6rem 0.6rem 2.2rem;
+        font-size: 0.8rem;
+        border-radius: 4px;
+    }
+    
+    .seen-contact-search-icon {
+        left: 8px;
+        width: 14px;
+        height: 14px;
+    }
+    
+    .seen-contact-result-item {
+        padding: 0.6rem;
+    }
+    
+    .seen-contact-result-name {
+        font-size: 0.8rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .seen-contact-result-details {
+        font-size: 0.7rem;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+    
+    .seen-contact-result-part,
+    .seen-contact-result-manufacturer {
+        padding: 1px 4px;
+        border-radius: 2px;
+        font-size: 0.65rem;
+    }
+    
+    .seen-contact-result-price {
+        font-size: 0.7rem;
+    }
+    
+    .seen-contact-modal-cancel,
+    .seen-contact-modal-add {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.8rem;
+        border-radius: 4px;
+    }
+    
+    .seen-contact-no-results {
+        padding: 2rem 1rem;
+    }
+    
+    .seen-contact-no-results svg {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 0.75rem;
+    }
+    
+    .seen-contact-no-results p {
+        font-size: 0.8rem;
+        margin: 0.5rem 0;
+    }
+    
+    .seen-contact-no-results-hint {
+        font-size: 0.7rem;
+    }
+    
+    /* Hide some less critical elements on very small screens */
+    .seen-contact-product-badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .seen-contact-product-details {
+        font-size: 0.75rem;
+    }
+    
+    .seen-contact-product-details strong {
+        font-size: 0.8rem;
+    }
+    
+    .seen-contact-product-details span {
+        font-size: 0.7rem;
+    }
+    
+    /* Optimize table for very small screens */
+    .seen-contact-requirements-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .seen-contact-requirements-table thead,
+    .seen-contact-requirements-table tbody,
+    .seen-contact-requirements-table th,
+    .seen-contact-requirements-table td,
+    .seen-contact-requirements-table tr {
+        display: block;
+    }
+    
+    .seen-contact-requirements-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    .seen-contact-requirements-table tr {
+        border: 1px solid var(--border-color);
+        margin-bottom: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 4px;
+        background: white;
+    }
+    
+    .seen-contact-requirements-table td {
+        border: none;
+        position: relative;
+        padding: 0.3rem 0;
+        padding-left: 30%;
+        white-space: normal;
+    }
+    
+    .seen-contact-requirements-table td:before {
+        content: attr(data-label) ": ";
+        position: absolute;
+        left: 0;
+        width: 25%;
+        padding-right: 0.5rem;
+        white-space: nowrap;
+        font-weight: 600;
+        font-size: 0.65rem;
+        color: var(--text-secondary);
+    }
+    
+    .seen-contact-requirements-table input,
+    .seen-contact-requirements-table select {
+        width: 100%;
+        padding: 0.4rem;
+        font-size: 0.7rem;
+        border: 1px solid var(--border-color);
+        border-radius: 3px;
+        background: white;
+    }
+    
+    /* Form layout optimizations */
+    .seen-contact-form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .seen-contact-form-group.half-width {
+        width: 100%;
+    }
+    
+    .seen-contact-form-row {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    /* Button optimizations */
+    .seen-contact-add-buttons {
+        gap: 0.5rem;
+    }
+    
+    .seen-contact-submit-buttons {
+        gap: 0.5rem;
+    }
+    
+    /* Modal optimizations */
+    .seen-contact-modal-overlay {
+        padding: 2px;
+    }
+    
+    .seen-contact-results-list {
+        max-height: 300px;
+    }
+    
+    /* Typography optimizations */
+    .seen-contact-form-title {
+        word-break: break-word;
+    }
+    
+    .seen-contact-form-subtitle {
+        word-break: break-word;
+    }
+    
+    /* Icon optimizations */
+    .seen-contact-section-title svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .seen-contact-add-row-btn svg,
+    .seen-contact-add-multiple-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .seen-contact-submit-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+}

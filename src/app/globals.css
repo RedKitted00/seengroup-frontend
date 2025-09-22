@@ -1,0 +1,102 @@
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Brand palette */
+  --brand-primary: #88BDF2; /* vivid highlight */
+  --brand-secondary: #6A89A7; /* supportive */
+  --brand-light: #BDDDFC; /* light tint */
+  --brand-dark: #384959; /* dark base */
+
+  /* Semantic aliases */
+  --color-primary: var(--brand-primary);
+  --color-accent: var(--brand-secondary);
+  --color-surface: var(--brand-dark);
+  --color-on-primary: #0b1a2a;
+  --color-on-surface: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+.seen-contact-form-group {
+  padding-bottom: 15px;
+}
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Hide header content before animation to prevent initial flash */
+.pre-anim .header-bottom {
+  visibility: hidden;
+}
+
+/* Brand utility classes (for consistency across app) */
+.text-primary { color: var(--color-primary) !important; }
+.text-accent { color: var(--brand-secondary) !important; }
+.text-light { color: var(--brand-light) !important; }
+.text-dark { color: var(--brand-dark) !important; }
+
+.bg-primary { background-color: var(--color-primary) !important; }
+.bg-accent { background-color: var(--brand-secondary) !important; }
+.bg-light { background-color: var(--brand-light) !important; }
+.bg-dark { background-color: var(--brand-dark) !important; }
+
+.border-primary { border-color: var(--color-primary) !important; }
+.border-accent { border-color: var(--brand-secondary) !important; }
+.border-light { border-color: var(--brand-light) !important; }
+.border-dark { border-color: var(--brand-dark) !important; }
+
+/* Buttons */
+.btn { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+.btn-primary { background-color: var(--color-primary); color: var(--color-on-primary); border-color: var(--color-primary); }
+.btn-primary:hover { background-color: var(--brand-secondary); border-color: var(--brand-secondary); }
+.btn-secondary { background-color: transparent; color: var(--brand-light); border: 1px solid var(--brand-primary); }
+.btn-secondary:hover { background-color: var(--brand-primary); color: var(--color-on-primary); }
+
+/* Links and interactive states */
+a { color: var(--brand-light); }
+a:hover { color: var(--color-primary); }
+
+/* Surfaces */
+.surface-dark { background-color: var(--brand-dark); color: var(--color-on-surface); }
+
+
+#site-logo {
+  margin-top: 10px;
+}
+
+@media screen and (max-width: 1024px) {
+  #site-logo {
+    margin-top: 34px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  #site-logo {
+    margin-top: 23px;
+  }
+}
+
+@media screen and (max-width: 624px) {
+  .logo-field {
+    display: flex;
+    justify-content: center;
+    width: 75%;
+    margin: auto;
+    align-items: center;
+
+  }
+}
