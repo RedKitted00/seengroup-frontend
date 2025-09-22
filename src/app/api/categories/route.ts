@@ -3,7 +3,7 @@
 export async function GET() {
   try {
     // Call the real backend API
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://seengroup-backend-tjer.onrender.com';
     const response = await fetch(`${backendUrl}/api/products/categories`);
     
     if (!response.ok) {
