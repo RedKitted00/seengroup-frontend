@@ -37,9 +37,9 @@ export async function GET(request: Request) {
     if (status) queryParams.append('status', status);
     queryParams.append('sortBy', sortBy);
     queryParams.append('sortOrder', sortOrder);
-    // Fetch all jobs - no pagination on backend
+    // Request a larger page size within backend validation limits (max 100)
     queryParams.append('page', '1');
-    queryParams.append('limit', '1000');
+    queryParams.append('limit', '100');
 
     // Forward request to backend Admin API
     const backendResponse = await fetch(`${BACKEND_URL}/api/admin/career/jobs?${queryParams.toString()}`, {
