@@ -1,7 +1,8 @@
 ﻿import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://workflow-backend-eek9.onrender.com';
+// Use the same fallback as other API routes for consistency
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://seengroup-backend-tjer.onrender.com';
 
 export async function GET(request: Request) {
   try {
@@ -40,8 +41,8 @@ export async function GET(request: Request) {
     queryParams.append('page', '1');
     queryParams.append('limit', '1000');
 
-    // Forward request to backend API
-    const backendResponse = await fetch(`${BACKEND_URL}/api/career/jobs?${queryParams.toString()}`, {
+    // Forward request to backend Admin API
+    const backendResponse = await fetch(`${BACKEND_URL}/api/admin/career/jobs?${queryParams.toString()}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -97,8 +98,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Forward request to backend API
-    const backendResponse = await fetch(`${BACKEND_URL}/api/career/jobs`, {
+    // Forward request to backend Admin API
+    const backendResponse = await fetch(`${BACKEND_URL}/api/admin/career/jobs`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

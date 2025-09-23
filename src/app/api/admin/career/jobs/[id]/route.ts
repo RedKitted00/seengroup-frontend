@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://workflow-backend-eek9.onrender.com';
+// Use consistent backend URL fallback
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://seengroup-backend-tjer.onrender.com';
 
 export async function GET(
   request: Request,
@@ -24,8 +25,8 @@ export async function GET(
       );
     }
 
-    // Forward request to backend API
-    const backendResponse = await fetch(`${BACKEND_URL}/api/career/jobs/${id}`, {
+    // Forward request to backend Admin API
+    const backendResponse = await fetch(`${BACKEND_URL}/api/admin/career/jobs/${id}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -85,14 +86,14 @@ export async function PUT(
       );
     }
 
-    // Forward request to backend API
-    const backendResponse = await fetch(`${BACKEND_URL}/api/career/jobs/${id}`, {
+    // Backend Admin API expects body with id on PUT to /api/admin/career/jobs
+    const backendResponse = await fetch(`${BACKEND_URL}/api/admin/career/jobs`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify({ ...body, id })
     });
 
     if (!backendResponse.ok) {
@@ -147,8 +148,8 @@ export async function DELETE(
       );
     }
 
-    // Forward request to backend API
-    const backendResponse = await fetch(`${BACKEND_URL}/api/career/jobs/${id}`, {
+    // Backend Admin API deletes via query param on /api/admin/career/jobs
+    const backendResponse = await fetch(`${BACKEND_URL}/api/admin/career/jobs?id=${encodeURIComponent(id)}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
