@@ -676,7 +676,7 @@ body {
 }
 
 .sei-accordion-content.open {
-  max-height: 500px;
+  max-height: 1500px;
 }
 
 /* Enhanced Search Bar */
