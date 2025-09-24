@@ -39,6 +39,11 @@ export async function POST(request: NextRequest) {
       data = null;
     }
 
+    // Handle OTP-required flow (202 Accepted) by passing through otpId
+    if (response.status === 202) {
+      return NextResponse.json(data || { success: true, message: 'OTP required' }, { status: 202 });
+    }
+
     if (response.ok) {
       // Normalize backend payload (supports {data:{token,user}} or {token,user})
       const token = data?.data?.token ?? data?.token;
@@ -89,10 +94,11 @@ export async function POST(request: NextRequest) {
         return res;
       }
 
-      // Neither token nor Set-Cookie present
+      // Neither token nor Set-Cookie present -> propagate backend message/status
+      const message = data?.message || 'Authentication step incomplete';
       return NextResponse.json(
-        { message: 'Token missing in backend response' },
-        { status: 502 }
+        { message },
+        { status: response.status || 502 }
       );
     } else {
       const message = data?.error || data?.message || 'Authentication failed';
