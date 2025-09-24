@@ -60,13 +60,13 @@ export default function SystemHealth({ systemHealth, performanceMetrics }: Syste
                     Database
                   </Badge>
                   <Badge 
-                    color={getHealthColor(systemHealth.api)}
+                    color={getHealthColor(systemHealth.database)}
                     leftSection={getHealthIcon(systemHealth.api)}
                   >
                     API
                   </Badge>
                   <Badge 
-                    color={getHealthColor(systemHealth.storage)}
+                    color={getHealthColor(systemHealth.database)}
                     leftSection={getHealthIcon(systemHealth.storage)}
                   >
                     Storage
