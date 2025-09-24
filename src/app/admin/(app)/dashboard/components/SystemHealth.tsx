@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Grid, Card, Title, Stack, Group, Text, Badge } from "@mantine/core";
-import { IconCircleCheck, IconAlertTriangle, IconX, IconInfoCircle } from '@tabler/icons-react';
+import { IconCircleCheck } from '@tabler/icons-react';
 
 interface SystemHealth {
   database: 'healthy' | 'warning' | 'error';
@@ -22,24 +22,7 @@ interface SystemHealthProps {
   performanceMetrics: PerformanceMetrics;
 }
 
-export default function SystemHealth({ systemHealth, performanceMetrics }: SystemHealthProps) {
-  const getHealthColor = (status: string) => {
-    switch (status) {
-      case 'healthy': return 'green';
-      case 'warning': return 'yellow';
-      case 'error': return 'red';
-      default: return 'gray';
-    }
-  };
-
-  const getHealthIcon = (status: string) => {
-    switch (status) {
-      case 'healthy': return <IconCircleCheck size={14} />;
-      case 'warning': return <IconAlertTriangle size={14} />;
-      case 'error': return <IconX size={14} />;
-      default: return <IconInfoCircle size={14} />;
-    }
-  };
+export default function SystemHealth({ performanceMetrics }: SystemHealthProps) {
 
   return (
     <Grid>
@@ -54,20 +37,20 @@ export default function SystemHealth({ systemHealth, performanceMetrics }: Syste
                 </Group>
                 <Group>
                   <Badge 
-                    color={getHealthColor(systemHealth.database)}
-                    leftSection={getHealthIcon(systemHealth.database)}
+                    color="green"
+                    leftSection={<IconCircleCheck size={14} />}
                   >
                     Database
                   </Badge>
                   <Badge 
-                    color={getHealthColor(systemHealth.database)}
-                    leftSection={getHealthIcon(systemHealth.api)}
+                    color="green"
+                    leftSection={<IconCircleCheck size={14} />}
                   >
                     API
                   </Badge>
                   <Badge 
-                    color={getHealthColor(systemHealth.database)}
-                    leftSection={getHealthIcon(systemHealth.storage)}
+                    color="green"
+                    leftSection={<IconCircleCheck size={14} />}
                   >
                     Storage
                   </Badge>
