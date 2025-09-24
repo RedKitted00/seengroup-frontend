@@ -15,6 +15,7 @@ import {
   Container,
   Alert,
   Image as MantineImage,
+  Modal,
 } from '@mantine/core';
 import { IconMail, IconLock, IconArrowRight, IconAlertCircle } from '@tabler/icons-react';
 // Removed unused apiClient import
@@ -25,6 +26,11 @@ export default function AdminSignIn() {
   const [error, setError] = useState('');
   const [isValid, setIsValid] = useState({ email: false, password: false });
   const [rememberMe, setRememberMe] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
+  const [otpId, setOtpId] = useState<string | null>(null);
+  const [otpCode, setOtpCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const [resending, setResending] = useState(false);
   const router = useRouter();
 
   const validateEmail = (email: string) => /[^\s@]+@[^\s@]+\.[^\s@]+/.test(email);
@@ -65,6 +71,16 @@ export default function AdminSignIn() {
 
       const data = await response.json();
 
+      // If backend requires OTP, we get 202 and an otpId
+      if (response.status === 202 && (data.success || data.message)) {
+        const id = data?.data?.otpId;
+        if (id) {
+          setOtpId(id);
+          setShowOtp(true);
+          return; // Wait for OTP verification
+        }
+      }
+
       if (response.ok && data.success) {
         // Store user info in sessionStorage (not sensitive data)
         const user = data.data?.user || data.user;
@@ -79,6 +95,39 @@ export default function AdminSignIn() {
       setError('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpId) return;
+    if (!/^\d{6}$/.test(otpCode)) {
+      setError('Please enter the 6-digit code');
+      return;
+    }
+    setVerifying(true);
+    setError('');
+    try {
+      const res = await fetch('/api/admin/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ otpId, code: otpCode })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const user = data.user || data.data?.user;
+        if (user) {
+          sessionStorage.setItem('adminUser', JSON.stringify(user));
+        }
+        setShowOtp(false);
+        router.push('/admin/dashboard');
+      } else {
+        setError(data.message || 'Invalid or expired code');
+      }
+    } catch {
+      setError('Network error during code verification');
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -171,6 +220,48 @@ export default function AdminSignIn() {
           </Stack>
         </Paper>
       </Center>
+
+      <Modal opened={showOtp} onClose={() => {}} withCloseButton={false} centered title="Enter 6-digit code">
+        <Stack gap="sm">
+          <Text c="dimmed" size="sm">We sent a 6-digit code to the admin email. Enter it below.</Text>
+          <TextInput
+            label="6-digit code"
+            placeholder="123456"
+            value={otpCode}
+            onChange={(e) => setOtpCode(e.currentTarget.value.replace(/[^0-9]/g, '').slice(0, 6))}
+            maxLength={6}
+            inputMode="numeric"
+            pattern="\d{6}"
+            required
+          />
+          {error && (
+            <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light">{error}</Alert>
+          )}
+          <Group justify="flex-end">
+            <Button onClick={handleVerifyOtp} loading={verifying} disabled={!/^\d{6}$/.test(otpCode)}>
+              Verify
+            </Button>
+            <Button variant="light" loading={resending} onClick={async () => {
+              if (!otpId) return;
+              setResending(true);
+              setError('');
+              try {
+                const r = await fetch('/api/admin/auth/resend-otp', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ otpId })
+                });
+                const d = await r.json();
+                if (!r.ok) setError(d.message || 'Please wait before requesting a new code');
+              } catch {
+                setError('Failed to resend code');
+              } finally {
+                setResending(false);
+              }
+            }}>Resend code</Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Container>
   );
 }
