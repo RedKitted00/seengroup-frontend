@@ -36,9 +36,7 @@ export default function Footer() {
                                 </a>
                             </div>
                         </div>
-                        <div className="social-media-field flex items-center justify-end sm:justify-center xsm:justify-center border-0 border-b border-solid border-white/15 relative after:absolute after:-left-44 2xl:after:-left-35 after:bottom-0 after:content after:w-1 after:h-full after:bg-white/15 after:skew-x-[30deg] padding-right-content md:px-30 md:py-10 md:justify-center md:order-3" style={{ paddingRight: "32px" }}>
-
-                        </div>
+                      
                     </div>
                     <div className="container max-w-full px-0">
                         <div className="wrapper w-full">
