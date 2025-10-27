@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'https://seengroup-backend.onrender.com';
+  process.env.NEXT_PUBLIC_BACKEND_URL;
 
 // GET /api/career/jobs/:id  ->  Backend /api/career/jobs/:id
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/career/jobs/${params.id}`, { method: 'GET' });
+    const { id } = await params;
+    const res = await fetch(`${BACKEND_URL}/api/career/jobs/${id}`, { method: 'GET' });
+    type BackendData = { success?: boolean; error?: string; message?: string; data?: unknown };
     const raw = await res.text();
-    let data: any;
-    try { data = JSON.parse(raw); } catch { data = { success: false, error: raw }; }
+    let data: BackendData;
+    try { data = JSON.parse(raw) as BackendData; } catch { data = { success: false, error: raw }; }
 
     if (!res.ok) {
       return NextResponse.json(
