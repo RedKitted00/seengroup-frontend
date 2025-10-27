@@ -6,7 +6,7 @@ import '../../../components/contact/style.css';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 import '../../../components/career/style.css';
-
+console.log('locale')
 interface Job {
   id: string;
   title: string;
@@ -24,8 +24,6 @@ interface Job {
   createdAt: string;
   updatedAt: string;
 }
-
-// const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 function CareerApplyContent() {
   const searchParams = useSearchParams();
@@ -76,7 +74,7 @@ function CareerApplyContent() {
       }
 
       try {
-        const response = await fetch(`/api/proxy/career/jobs/${jobId}`, { credentials: 'include' });
+        const response = await fetch(`/api/career/jobs/${jobId}`, { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {
@@ -132,7 +130,7 @@ function CareerApplyContent() {
     }
 
     try {
-      const response = await fetch(`/api/proxy/career/applications`, {
+      const response = await fetch(`/api/career`, {
         method: 'POST',
         credentials: 'include',
         body: formData,

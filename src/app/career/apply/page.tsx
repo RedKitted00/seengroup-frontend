@@ -6,6 +6,7 @@ import '../../components/contact/style.css';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 import '../../components/career/style.css';
+console.log('default')
 
 interface Job {
   id: string;
