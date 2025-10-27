@@ -2,7 +2,7 @@
 import { cookies } from 'next/headers';
 
 // Use the same fallback as other API routes for consistency
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://seengroup-backend-tjer.onrender.com';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export async function GET(request: Request) {
   try {

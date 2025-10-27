@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 // Backend API base URL
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://seengroup-backend-tjer.onrender.com';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 // GET endpoint to retrieve individual job details from backend database
 export async function GET(request, { params }) {

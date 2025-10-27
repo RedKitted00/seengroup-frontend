@@ -414,5 +414,5 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient(BACKEND_URL || 'https://seengroup-backend-tjer.onrender.com');
+export const apiClient = new ApiClient(BACKEND_URL || 'https://seengroup-backend.onrender.com');
 

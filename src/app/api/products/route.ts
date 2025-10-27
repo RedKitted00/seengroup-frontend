@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     if (categoryId) backendParams.append('categoryId', categoryId);
 
     // Call the real backend API
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://seengroup-backend-tjer.onrender.com';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
     console.log('Backend URL:', backendUrl);
     const fullUrl = `${backendUrl}/api/products?${backendParams.toString()}`;
     console.log('Full API URL:', fullUrl);

@@ -35,7 +35,6 @@ interface JobFilters {
   type: string;
 }
 
-// const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL; // Currently unused
 const ITEMS_PER_PAGE = 5;
 
 export default function Career() {

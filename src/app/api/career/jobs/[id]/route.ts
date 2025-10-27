@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'https://seengroup-backend-tjer.onrender.com';
+  'https://seengroup-backend.onrender.com';
 
 // GET /api/career/jobs/:id  ->  Backend /api/career/jobs/:id
 export async function GET(_req: Request, { params }: { params: { id: string } }) {

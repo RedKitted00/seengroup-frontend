@@ -1,12 +1,9 @@
 // seengroup-frontend/src/app/api/contact/route.js
 import { NextResponse } from 'next/server';
 
-/**
- * Backend URL'i tek yerden çöz.
- * NEXT_PUBLIC_BACKEND_URL varsa onu, yoksa BACKEND_URL'i kullanır.
- */
+
 const resolveBackendUrl = () => {
-  const url = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL;
+  const url = process.env.NEXT_PUBLIC_BACKEND_URL;
   return url && url.trim().length > 0 ? url.trim() : '';
 };
 
