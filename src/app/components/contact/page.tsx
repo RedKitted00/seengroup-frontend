@@ -9,11 +9,20 @@ import Icon from '../ui/Icon';
 import API_CONFIG from '../../../config/api';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 // Extend Window interface for API_CONFIG and Turnstile
+
+type TurnstileRenderOptions = {
+    sitekey: string;
+    theme?: 'auto' | 'light' | 'dark';
+    callback?: (token: string) => void;
+    'expired-callback'?: () => void;
+    'error-callback'?: () => void;
+};
+
 declare global {
     interface Window {
         API_CONFIG?: typeof API_CONFIG;
         turnstile?: {
-            render: (container: HTMLElement, opts: any) => string;
+            render: (container: HTMLElement, opts: TurnstileRenderOptions) => string;
             reset?: (id?: string) => void;
             remove?: (id?: string) => void;
         };
@@ -169,13 +178,13 @@ export default function Contact() {
 
                 // Automatically add the product to the requirements table
                 addProductToTable(normalized);
-                
+
                 // Auto-select "sales" as the contact reason when coming from a product page
                 setFormData(prev => ({
                     ...prev,
                     contactReason: 'sales'
                 }));
-                
+
                 // Disable the contact reason dropdown when coming from a product page
                 setIsContactReasonDisabled(true);
 
@@ -183,8 +192,8 @@ export default function Contact() {
                 setTimeout(() => {
                     const formElement = document.getElementById('lead-form');
                     if (formElement) {
-                        formElement.scrollIntoView({ 
-                            behavior: 'smooth', 
+                        formElement.scrollIntoView({
+                            behavior: 'smooth',
                             block: 'start',
                             inline: 'nearest'
                         });
@@ -208,10 +217,10 @@ export default function Contact() {
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const productParam = urlParams.get('product');
-        
+
         // Always clean URL on component mount (handles refresh and navigation)
         cleanUrl();
-        
+
         // Scroll to top regardless of navigation source
         if (productParam) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -236,7 +245,7 @@ export default function Contact() {
             if (!window.turnstile || !turnstileContainerRef.current) return;
             // Remove any existing Turnstile widget before rendering a new one
             if (turnstileWidgetIdRef.current && window.turnstile.remove) {
-                try { window.turnstile.remove(turnstileWidgetIdRef.current); } catch {}
+                try { window.turnstile.remove(turnstileWidgetIdRef.current); } catch { }
                 turnstileWidgetIdRef.current = null;
             }
             try {
@@ -263,7 +272,8 @@ export default function Contact() {
             document.head.appendChild(script);
         } else {
             // If script already present, attempt render immediately (it may already be loaded)
-            if ((script as any).readyState === 'complete' || (script as any).readyState === 'loaded') {
+            const rs = (script as HTMLScriptElement & { readyState?: string }).readyState;
+            if (rs === 'complete' || rs === 'loaded') {
                 renderIfReady();
             } else {
                 script.addEventListener('load', renderIfReady, { once: true });
@@ -273,7 +283,7 @@ export default function Contact() {
         return () => {
             // Remove Turnstile widget when component unmounts
             if (turnstileWidgetIdRef.current && window.turnstile?.remove) {
-                try { window.turnstile.remove(turnstileWidgetIdRef.current); } catch {}
+                try { window.turnstile.remove(turnstileWidgetIdRef.current); } catch { }
                 turnstileWidgetIdRef.current = null;
             }
         };
@@ -401,11 +411,11 @@ export default function Contact() {
                 newErrors.products = 'At least one product is required';
             } else {
                 const invalidProducts = productRequirements.some(req =>
-                    !req.productName.trim() || 
-                    !req.partNumber.trim() || 
-                    !req.manufacturer.trim() || 
-                    (req.price !== null && req.price <= 0) || 
-                    !req.leadTime || 
+                    !req.productName.trim() ||
+                    !req.partNumber.trim() ||
+                    !req.manufacturer.trim() ||
+                    (req.price !== null && req.price <= 0) ||
+                    !req.leadTime ||
                     req.quantity < 1
                 );
                 if (invalidProducts) {
@@ -420,7 +430,7 @@ export default function Contact() {
 
     // Focus the first invalid field when validation fails
     const focusFirstError = (errs: FormErrors) => {
-        const order: (keyof FormErrors)[] = ['firstName','lastName','company','country','phone','email','contactReason','message','products','submit'];
+        const order: (keyof FormErrors)[] = ['firstName', 'lastName', 'company', 'country', 'phone', 'email', 'contactReason', 'message', 'products', 'submit'];
         const firstKey = order.find(k => errs[k] !== undefined);
         if (!firstKey) return;
         const targetId = firstKey === 'products' ? 'requirements-table' : String(firstKey);
@@ -536,7 +546,7 @@ export default function Contact() {
                     fetchPriority="high"
                 />
             </Head>
-            
+
             {/* Notification container with aria-live for accessibility */}
             <div className="notification-container" role="status" aria-live="polite" aria-atomic="true">
                 {notifications.map(notification => (
@@ -581,7 +591,7 @@ export default function Contact() {
                         onError={() => setBackgroundLoaded(true)}
                     />
                 </div>
-                
+
                 {/* Office locations */}
                 <div className="seen-contact-offices-section">
                     <h2 className="seen-contact-offices-title">
@@ -591,95 +601,95 @@ export default function Contact() {
                     <div className="seen-contact-offices-grid">
 
 
-                    {/* Turkey office */}
-                    <div className="seen-contact-office-card">
-                        <div className="seen-contact-office-header">
-                            <div className="seen-contact-office-icon">
-                                <Image 
-                                    src="/imgs/globe_2.png" 
-                                    alt="Turkey Office" 
-                                    width={40} 
-                                    height={40}
-                                    className="seen-contact-globe-icon"
-                                    priority
-                                />
+                        {/* Turkey office */}
+                        <div className="seen-contact-office-card">
+                            <div className="seen-contact-office-header">
+                                <div className="seen-contact-office-icon">
+                                    <Image
+                                        src="/imgs/globe_2.png"
+                                        alt="Turkey Office"
+                                        width={40}
+                                        height={40}
+                                        className="seen-contact-globe-icon"
+                                        priority
+                                    />
+                                </div>
+                                <div className="seen-contact-office-info">
+                                    <h3 className="seen-contact-office-name">SEEN GROUP</h3>
+                                    <p className="seen-contact-office-country">Turkey</p>
+                                </div>
                             </div>
-                            <div className="seen-contact-office-info">
-                                <h3 className="seen-contact-office-name">SEEN GROUP</h3>
-                                <p className="seen-contact-office-country">Turkey</p>
-                            </div>
-                        </div>
-                       
-                        <a
-                            href="https://maps.app.goo.gl/W1x9R5D6Zi6vTBqe7?g_st=atm"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="seen-contact-directions-btn"
-                        >
-                            <Icon name="icon-location" size={16} />
-                            {t('contact.get_directions')}
-                        </a>
-                    </div>
 
-                    {/* Germany office */}
-                    <div className="seen-contact-office-card">
-                        <div className="seen-contact-office-header">
-                            <div className="seen-contact-office-icon">
-                                <Image 
-                                    src="/imgs/globe_3.png" 
-                                    alt="Germany Office" 
-                                    width={40} 
-                                    height={40}
-                                    className="seen-contact-globe-icon"
-                                    priority
-                                />
-                            </div>
-                            <div className="seen-contact-office-info">
-                                <h3 className="seen-contact-office-name">SEEN GmbH</h3>
-                                <p className="seen-contact-office-country">Germany</p>
-                            </div>
+                            <a
+                                href="https://maps.app.goo.gl/W1x9R5D6Zi6vTBqe7?g_st=atm"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="seen-contact-directions-btn"
+                            >
+                                <Icon name="icon-location" size={16} />
+                                {t('contact.get_directions')}
+                            </a>
                         </div>
-                      
-                        <a
-                            href="https://maps.app.goo.gl/pkTo5kv8gcQbEvBc8?g_st=atm"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="seen-contact-directions-btn"
-                        >
-                            <Icon name="icon-location" size={16} />
-                            {t('contact.get_directions')}
-                        </a>
-                    </div>
 
-                    {/* UAE office */}
-                    <div className="seen-contact-office-card">
-                        <div className="seen-contact-office-header">
-                            <div className="seen-contact-office-icon">
-                                <Image 
-                                    src="/imgs/globle-1.png" 
-                                    alt="UAE Office" 
-                                    width={40} 
-                                    height={40}
-                                    className="seen-contact-globe-icon"
-                                    priority
-                                />
+                        {/* Germany office */}
+                        <div className="seen-contact-office-card">
+                            <div className="seen-contact-office-header">
+                                <div className="seen-contact-office-icon">
+                                    <Image
+                                        src="/imgs/globe_3.png"
+                                        alt="Germany Office"
+                                        width={40}
+                                        height={40}
+                                        className="seen-contact-globe-icon"
+                                        priority
+                                    />
+                                </div>
+                                <div className="seen-contact-office-info">
+                                    <h3 className="seen-contact-office-name">SEEN GmbH</h3>
+                                    <p className="seen-contact-office-country">Germany</p>
+                                </div>
                             </div>
-                            <div className="seen-contact-office-info">
-                                <h3 className="seen-contact-office-name">SEEN GROUP UAE</h3>
-                                <p className="seen-contact-office-country">United Arab Emirates</p>
-                            </div>
+
+                            <a
+                                href="https://maps.app.goo.gl/pkTo5kv8gcQbEvBc8?g_st=atm"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="seen-contact-directions-btn"
+                            >
+                                <Icon name="icon-location" size={16} />
+                                {t('contact.get_directions')}
+                            </a>
                         </div>
-               
-                        <a
-                            href="https://maps.app.goo.gl/tTbrFEvQxdn6FEAG9?g_st=atm"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="seen-contact-directions-btn"
-                        >
-                            <Icon name="icon-location" size={16} />
-                            {t('contact.get_directions')}
-                        </a>
-                    </div>
+
+                        {/* UAE office */}
+                        <div className="seen-contact-office-card">
+                            <div className="seen-contact-office-header">
+                                <div className="seen-contact-office-icon">
+                                    <Image
+                                        src="/imgs/globle-1.png"
+                                        alt="UAE Office"
+                                        width={40}
+                                        height={40}
+                                        className="seen-contact-globe-icon"
+                                        priority
+                                    />
+                                </div>
+                                <div className="seen-contact-office-info">
+                                    <h3 className="seen-contact-office-name">SEEN GROUP UAE</h3>
+                                    <p className="seen-contact-office-country">United Arab Emirates</p>
+                                </div>
+                            </div>
+
+                            <a
+                                href="https://maps.app.goo.gl/tTbrFEvQxdn6FEAG9?g_st=atm"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="seen-contact-directions-btn"
+                            >
+                                <Icon name="icon-location" size={16} />
+                                {t('contact.get_directions')}
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -962,7 +972,7 @@ export default function Contact() {
                                                     <th>{t('contact.table.product_name')}</th>
                                                     <th>{t('contact.table.part_number')}</th>
                                                     <th>Manufacturer</th>
-                                                  
+
                                                     <th>{t('contact.table.quantity')}</th>
                                                     <th>{t('contact.table.lead_time')}</th>
                                                     <th>{t('contact.table.action')}</th>
@@ -970,7 +980,7 @@ export default function Contact() {
                                             </thead>
                                             <tbody id="requirements-tbody">
                                                 {productRequirements.map(req => (
-                                                    <tr key={req.id} className={req.isPreFilled ? 'pre-filled-product' : ''} style={{color: "#000000"}}>
+                                                    <tr key={req.id} className={req.isPreFilled ? 'pre-filled-product' : ''} style={{ color: "#000000" }}>
                                                         <td data-label={t('contact.table.product_name')}>
                                                             <input
                                                                 type="text"
@@ -1009,7 +1019,7 @@ export default function Contact() {
                                                                 }}
                                                             />
                                                         </td>
-                                                       
+
                                                         <td data-label={t('contact.table.quantity')}>
                                                             <input
                                                                 type="number"
@@ -1028,10 +1038,10 @@ export default function Contact() {
                                                             />
                                                         </td>
                                                         <td data-label={t('contact.table.lead_time')}>
-                                                            <select 
-                                                                name="leadTime[]" 
+                                                            <select
+                                                                name="leadTime[]"
                                                                 value={req.leadTime}
-                                                                required 
+                                                                required
                                                                 onChange={(e) => updateProductRequirement(req.id, 'leadTime', e.target.value)}
                                                             >
                                                                 <option value="">{t('contact.form.select_lead_time')}</option>
@@ -1052,7 +1062,7 @@ export default function Contact() {
                                             </tbody>
                                         </table>
 
-                                    {/* Button to add another product requirement row */}
+                                        {/* Button to add another product requirement row */}
                                         <div className="seen-contact-add-buttons">
                                             <button
                                                 type="button"
