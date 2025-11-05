@@ -1083,7 +1083,7 @@ export default function Contact() {
                             {/* Submit button and Cloudflare Turnstile captcha */}
                             <div className="seen-contact-form-section">
                                 {/* Cloudflare Turnstile (captcha) */}
-                                <div className="p-4">
+                                <div>
                                     {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? (
                                         <div ref={turnstileContainerRef} id="turnstile-container" />
                                     ) : (
