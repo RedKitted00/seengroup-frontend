@@ -81,6 +81,12 @@ interface Notification {
     duration?: number;
 }
 
+type ApiResponse = {
+    success?: boolean;
+    error?: string;
+    message?: string;
+};
+
 // Country to phone number mapping for phone input formatting and examples
 const countryPhoneMapping: { [key: string]: { code: string; format: string; example: string } } = {
     'Turkey': { code: '+90', format: '+90 XXX XXX XX XX', example: '+90 212 438 75 50' },
@@ -151,10 +157,10 @@ export default function Contact() {
 
     // Helper to safely reset Turnstile widget
     const resetTurnstile = () => {
-      const id = turnstileWidgetIdRef.current;
-      if (id && window.turnstile?.reset) {
-        try { window.turnstile.reset(id); } catch {}
-      }
+        const id = turnstileWidgetIdRef.current;
+        if (id && window.turnstile?.reset) {
+            try { window.turnstile.reset(id); } catch { }
+        }
     };
 
 
@@ -500,7 +506,8 @@ export default function Contact() {
             }
 
             if (!response.ok) {
-                const msg = (responseData as any)?.error || (responseData as any)?.message || 'Failed to submit form';
+                const resp = responseData as ApiResponse;
+                const msg = resp?.error ?? resp?.message ?? 'Failed to submit form';
                 throw new Error(String(msg));
             }
 
