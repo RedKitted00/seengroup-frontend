@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/product-images_*',
       },
+        {
+        protocol: 'https',
+        hostname: 'pub-8b25a422bd234ffab965d339ba7bc4aa.r2.dev',
+      },
     ],
   },
   env: {

@@ -491,10 +491,17 @@ export default function Contact() {
             });
             clearTimeout(timeoutId);
 
-            const responseData = await response.json();
+            let responseData: unknown;
+            try {
+                responseData = await response.json();
+            } catch {
+                const txt = await response.text();
+                throw new Error(txt?.slice(0, 200) || 'Failed to submit form');
+            }
 
             if (!response.ok) {
-                throw new Error(responseData.error || 'Failed to submit form');
+                const msg = (responseData as any)?.error || (responseData as any)?.message || 'Failed to submit form';
+                throw new Error(String(msg));
             }
 
             setIsSubmitted(true);

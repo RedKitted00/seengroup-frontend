@@ -8,39 +8,6 @@ const resolveBackendUrl = () => {
   return url;
 };
 
-/**
- * Cloudflare Turnstile server-side verification
- * @param {string} captchaToken - Token received from frontend
- * @param {string} remoteIp - Optional client IP (for some verification policies)
- * Requires: TURNSTILE_SECRET_KEY environment variable (must be set in production)
- */
-async function verifyTurnstile(captchaToken, remoteIp) {
-  const secret = process.env.TURNSTILE_SECRET_KEY; // IMPORTANT: Must be set in production
-  if (!secret) {
-    console.error('TURNSTILE_SECRET_KEY is missing on server');
-    return { ok: false, reason: 'server-missing-secret' };
-  }
-
-  const body = new URLSearchParams();
-  body.set('secret', secret);
-  body.set('response', captchaToken || '');
-  if (remoteIp) body.set('remoteip', remoteIp);
-
-  const resp = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body
-  });
-
-  let data = {};
-  try { data = await resp.json(); } catch {}
-
-  if (!data?.success) {
-    console.error('Turnstile verify failed:', data);
-    return { ok: false, reason: 'verify-failed', data };
-  }
-  return { ok: true };
-}
 
 export async function POST(request) {
   try {
@@ -60,6 +27,7 @@ export async function POST(request) {
         { status: 500 }
       );
     }
+    const clientIP = (request.headers.get('x-forwarded-for') || '').split(',')[0]?.trim() || undefined;
     const body = await request.json();
     const { captchaToken, ...rest } = body || {};
 
@@ -80,8 +48,12 @@ export async function POST(request) {
     try {
       forwardResp = await fetch(`${backendUrl}/api/contact`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // Forward captchaToken to backend if required
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': reqOrigin,
+          'Referer': `${reqOrigin}/contact`,
+          ...(clientIP ? { 'X-Forwarded-For': clientIP } : {})
+        },
         body: JSON.stringify({ captchaToken, ...rest }),
         signal: controller.signal,
       });
@@ -95,15 +67,25 @@ export async function POST(request) {
       clearTimeout(timeout);
     }
 
-    // Expect JSON from backend; if parsing fails, wrap as text
+    // Prefer JSON; if not JSON, return a safe JSON envelope with sliced text/HTML
+    const contentType = forwardResp.headers.get('content-type') || '';
     let data;
-    const text = await forwardResp.text();
-    try { data = JSON.parse(text); } catch { data = { success: forwardResp.ok, message: text }; }
+    if (contentType.includes('application/json')) {
+      try {
+        data = await forwardResp.json();
+      } catch {
+        const txt = await forwardResp.text();
+        data = { success: forwardResp.ok, message: txt.slice(0, 500) };
+      }
+    } else {
+      const txt = await forwardResp.text();
+      data = { success: forwardResp.ok, message: txt.slice(0, 500) };
+    }
     if (!forwardResp.ok) {
       console.error('[contact api] Upstream responded with error', {
         status: forwardResp.status,
         statusText: forwardResp.statusText,
-        body: text?.slice(0, 500),
+        body: typeof data === 'string' ? String(data).slice(0, 500) : data,
         backendUrl
       });
     }
