@@ -8,13 +8,13 @@ const resolveBackendUrl = () => {
 };
 
 /**
- * Cloudflare Turnstile server-side doğrulama
- * - captchaToken: front-end'den gelen token
- * - remoteIp: (ops.) X-Forwarded-For ilk IP
- * ENV: TURNSTILE_SECRET_KEY (Vercel'de Production’da tanımlı olmalı)
+ * Cloudflare Turnstile server-side verification
+ * @param {string} captchaToken - Token received from frontend
+ * @param {string} remoteIp - Optional client IP (for some verification policies)
+ * Requires: TURNSTILE_SECRET_KEY environment variable (must be set in production)
  */
 async function verifyTurnstile(captchaToken, remoteIp) {
-  const secret = process.env.TURNSTILE_SECRET_KEY; // <-- BUNA DİKKAT
+  const secret = process.env.TURNSTILE_SECRET_KEY; // IMPORTANT: Must be set in production
   if (!secret) {
     console.error('TURNSTILE_SECRET_KEY is missing on server');
     return { ok: false, reason: 'server-missing-secret' };
@@ -50,17 +50,23 @@ export async function POST(request) {
         { status: 500 }
       );
     }
-
-    // İstek gövdesi
     const body = await request.json();
     const { captchaToken, ...rest } = body || {};
 
-    // (Opsiyonel) IP (bazı doğrulama politikaları için faydalı)
+    // Require captcha token for managed Turnstile
+    if (!captchaToken || typeof captchaToken !== 'string' || !captchaToken.trim()) {
+      return NextResponse.json(
+        { success: false, error: 'Captcha token missing' },
+        { status: 400 }
+      );
+    }
+
+    // Optionally get client IP for verification policies
     const ip = (request.headers.get('x-forwarded-for') || '')
       .split(',')[0]
       ?.trim();
 
-    // 1) Turnstile doğrulaması (server-side, burada)
+    // 1) Perform Turnstile verification (server-side)
     const vt = await verifyTurnstile(captchaToken, ip);
     if (!vt.ok) {
       return NextResponse.json(
@@ -69,15 +75,15 @@ export async function POST(request) {
       );
     }
 
-    // 2) Doğrulama geçti → isteği backend'e ilet
+    // 2) If verification succeeded, forward request to backend
     const forwardResp = await fetch(`${backendUrl}/api/contact`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // Backend istiyorsa captchaToken'ı da iletmeye devam ediyoruz
+      // Forward captchaToken to backend if required
       body: JSON.stringify({ captchaToken, ...rest })
     });
 
-    // Backend'ten JSON bekliyoruz; parse edilemezse metni sarmalarız
+    // Expect JSON from backend; if parsing fails, wrap as text
     let data;
     const text = await forwardResp.text();
     try { data = JSON.parse(text); } catch { data = { success: forwardResp.ok, message: text }; }

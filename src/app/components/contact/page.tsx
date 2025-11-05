@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Head from 'next/head';
 import { useRouter } from 'next/navigation';
@@ -8,13 +8,15 @@ import './style.css';
 import Icon from '../ui/Icon';
 import API_CONFIG from '../../../config/api';
 import { useTranslation } from '@/lib/i18n/useTranslation';
-// Extend Window interface for API_CONFIG
+// Extend Window interface for API_CONFIG and Turnstile
 declare global {
     interface Window {
         API_CONFIG?: typeof API_CONFIG;
-        onTurnstileSuccess?: (token: string) => void;
-        onTurnstileExpired?: () => void;
-        onTurnstileError?: () => void;
+        turnstile?: {
+            render: (container: HTMLElement, opts: any) => string;
+            reset?: (id?: string) => void;
+            remove?: (id?: string) => void;
+        };
     }
 }
 
@@ -70,7 +72,7 @@ interface Notification {
     duration?: number;
 }
 
-// Country to phone number mapping
+// Country to phone number mapping for phone input formatting and examples
 const countryPhoneMapping: { [key: string]: { code: string; format: string; example: string } } = {
     'Turkey': { code: '+90', format: '+90 XXX XXX XX XX', example: '+90 212 438 75 50' },
     'United States': { code: '+1', format: '+1 (XXX) XXX-XXXX', example: '+1 (555) 123-4567' },
@@ -102,7 +104,7 @@ const countryPhoneMapping: { [key: string]: { code: string; format: string; exam
     'Other': { code: '+', format: '+XXX XXX XXX XXX', example: '+123 456 789 012' }
 };
 
-// Function to get country code for a country
+// Returns the country code for the selected country
 const getCountryCode = (country: string): string => {
     const mapping = countryPhoneMapping[country];
     if (!mapping) return '';
@@ -134,8 +136,12 @@ export default function Contact() {
     const [isContactReasonDisabled, setIsContactReasonDisabled] = useState<boolean>(false);
     const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
+    // Refs for Cloudflare Turnstile (captcha)
+    const turnstileContainerRef = useRef<HTMLDivElement | null>(null);
+    const turnstileWidgetIdRef = useRef<string | null>(null);
 
-    // Handle product data from URL parameters and set API config
+
+    // Parse product data from URL parameters and set API config for client-side
     useEffect(() => {
         // Make API configuration available to client-side JavaScript
         if (typeof window !== 'undefined') {
@@ -149,7 +155,7 @@ export default function Contact() {
             try {
                 const raw = JSON.parse(decodeURIComponent(productParam));
 
-                // Normalize incoming product object to expected shape
+                // Normalize incoming product object to the expected structure
                 const normalized: ProductInfo = {
                     id: String(raw.id ?? raw._id ?? ''),
                     name: raw.name ?? raw.productName ?? raw.title ?? raw.modelName ?? raw.model ?? '',
@@ -161,19 +167,19 @@ export default function Contact() {
 
                 setProductData(normalized);
 
-                // Auto-add the product to the requirements table
+                // Automatically add the product to the requirements table
                 addProductToTable(normalized);
                 
-                // Auto-select "sales" as contact reason when coming from product page
+                // Auto-select "sales" as the contact reason when coming from a product page
                 setFormData(prev => ({
                     ...prev,
                     contactReason: 'sales'
                 }));
                 
-                // Disable contact reason dropdown when coming from product page
+                // Disable the contact reason dropdown when coming from a product page
                 setIsContactReasonDisabled(true);
 
-                // Bug A Fix: Scroll to contact form when coming from product page
+                // Scroll to the contact form if navigated from a product page
                 setTimeout(() => {
                     const formElement = document.getElementById('lead-form');
                     if (formElement) {
@@ -190,7 +196,7 @@ export default function Contact() {
         }
     }, []);
 
-    // Clean URL to remove query parameters
+    // Remove query parameters from URL after navigation
     const cleanUrl = useCallback(() => {
         if (window.location.search) {
             router.replace('/contact', { scroll: false });
@@ -198,92 +204,98 @@ export default function Contact() {
     }, [router]);
 
 
-    // Handle URL parameters and clean URL when needed
+    // On mount or after product navigation, clean URL and scroll to top
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const productParam = urlParams.get('product');
         
-        // Always clean URL on component mount
-        // This handles both refresh and navigation scenarios
+        // Always clean URL on component mount (handles refresh and navigation)
         cleanUrl();
         
-        // If there's a product parameter, process it (from product page navigation)
+        // Scroll to top regardless of navigation source
         if (productParam) {
-            // Product data will be processed by the first useEffect
-            // Just scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
-            // No product parameter, just scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }, [cleanUrl]);
 
-    // Optimized background image loading
+    // Mark background as loaded immediately to prevent CORS issues for images
     useEffect(() => {
-        // Set background as loaded immediately to prevent CORS issues
         setBackgroundLoaded(true);
     }, []);
 
-    // Load Cloudflare Turnstile script and set callbacks
+    // Load and render Cloudflare Turnstile widget (captcha, managed mode)
     useEffect(() => {
-        const existing = document.querySelector('script[data-turnstile]') as HTMLScriptElement | null;
-        if (!existing) {
-            const script = document.createElement('script');
+        const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '';
+        if (!siteKey) return;
+
+        // Ensure the Turnstile script is loaded and render the widget
+        let script = document.querySelector('script[data-turnstile]') as HTMLScriptElement | null;
+        const renderIfReady = () => {
+            if (!window.turnstile || !turnstileContainerRef.current) return;
+            // Remove any existing Turnstile widget before rendering a new one
+            if (turnstileWidgetIdRef.current && window.turnstile.remove) {
+                try { window.turnstile.remove(turnstileWidgetIdRef.current); } catch {}
+                turnstileWidgetIdRef.current = null;
+            }
+            try {
+                const id = window.turnstile.render(turnstileContainerRef.current, {
+                    sitekey: siteKey,
+                    theme: 'auto',
+                    callback: (token: string) => setCaptchaToken(token),
+                    'expired-callback': () => setCaptchaToken(null),
+                    'error-callback': () => setCaptchaToken(null)
+                });
+                turnstileWidgetIdRef.current = id;
+            } catch {
+                // no-op; will retry if needed
+            }
+        };
+
+        if (!script) {
+            script = document.createElement('script');
             script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
             script.async = true;
             script.defer = true;
             script.setAttribute('data-turnstile', 'true');
+            script.addEventListener('load', renderIfReady, { once: true });
             document.head.appendChild(script);
+        } else {
+            // If script already present, attempt render immediately (it may already be loaded)
+            if ((script as any).readyState === 'complete' || (script as any).readyState === 'loaded') {
+                renderIfReady();
+            } else {
+                script.addEventListener('load', renderIfReady, { once: true });
+            }
         }
 
-        const showInlineError = (message: string, duration: number = 5000) => {
-            const id = Date.now().toString();
-            const notification: Notification = { id, type: 'error', message, duration };
-            setNotifications(prev => [...prev, notification]);
-            setTimeout(() => {
-                setNotifications(prev => prev.filter(n => n.id !== id));
-            }, duration);
-        };
-
-        // Expose callbacks for the Turnstile widget
-        window.onTurnstileSuccess = (token: string) => {
-            setCaptchaToken(token);
-        };
-        window.onTurnstileExpired = () => {
-            setCaptchaToken(null);
-        };
-        window.onTurnstileError = () => {
-            setCaptchaToken(null);
-            showInlineError('Captcha verification failed. Please try again.');
-        };
-
         return () => {
-            delete window.onTurnstileSuccess;
-            delete window.onTurnstileExpired;
-            delete window.onTurnstileError;
+            // Remove Turnstile widget when component unmounts
+            if (turnstileWidgetIdRef.current && window.turnstile?.remove) {
+                try { window.turnstile.remove(turnstileWidgetIdRef.current); } catch {}
+                turnstileWidgetIdRef.current = null;
+            }
         };
     }, []);
 
 
-    // Function to remove notification
     const removeNotification = useCallback((id: string) => {
         setNotifications(prev => prev.filter(notification => notification.id !== id));
     }, []);
 
-    // Function to add notification
     const addNotification = useCallback((type: 'success' | 'error' | 'info', message: string, duration: number = 5000) => {
         const id = Date.now().toString();
         const notification: Notification = { id, type, message, duration };
 
         setNotifications(prev => [...prev, notification]);
 
-        // Auto-remove notification after duration
+        // Remove notification automatically after duration expires
         setTimeout(() => {
             removeNotification(id);
         }, duration);
     }, [removeNotification]);
 
-    // Function to add product to requirements table
     const addProductToTable = (product: ProductInfo) => {
         const newRequirement: ProductRequirement = {
             id: Date.now().toString(),
@@ -298,7 +310,6 @@ export default function Contact() {
         setProductRequirements(prev => [...prev, newRequirement]);
     };
 
-    // Function to add empty row for manual product input
     const addEmptyRow = () => {
         const newRequirement: ProductRequirement = {
             id: Date.now().toString(),
@@ -312,12 +323,10 @@ export default function Contact() {
         setProductRequirements(prev => [...prev, newRequirement]);
     };
 
-    // Function to remove row
     const removeRow = (id: string) => {
         setProductRequirements(prev => prev.filter(item => item.id !== id));
     };
 
-    // Function to update product requirement field
     const updateProductRequirement = (id: string, field: keyof ProductRequirement, value: string | number | null) => {
         setProductRequirements(prev =>
             prev.map(item =>
@@ -328,12 +337,12 @@ export default function Contact() {
 
 
 
-    // Handle form input changes
+    // Handle form input changes and auto-fill country code when country changes
     const handleInputChange = (field: keyof FormData, value: string) => {
         setFormData(prev => {
             const newFormData = { ...prev, [field]: value };
 
-            // Auto-fill country code when country is selected
+            // If country changes, auto-fill phone field with country code
             if (field === 'country' && value && value !== '') {
                 const countryCode = getCountryCode(value);
                 if (countryCode) {
@@ -344,13 +353,13 @@ export default function Contact() {
             return newFormData;
         });
 
-        // Clear error when user starts typing
+        // Clear error for the field when user starts typing
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: undefined }));
         }
     };
 
-    // Validation functions
+    // Validation functions for form fields
     const validateEmail = (email: string): boolean => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
@@ -364,7 +373,7 @@ export default function Contact() {
     const validateForm = (): boolean => {
         const newErrors: FormErrors = {};
 
-        // Required field validation
+        // Validate required fields
         if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
         if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
         if (!formData.company.trim()) newErrors.company = 'Company name is required';
@@ -373,12 +382,12 @@ export default function Contact() {
         if (!formData.email.trim()) newErrors.email = 'Email is required';
         if (!formData.contactReason) newErrors.contactReason = 'Please select a contact reason';
 
-        // Message validation for non-sales contacts
+        // For non-sales contacts, message is required
         if (formData.contactReason && formData.contactReason !== 'sales' && !formData.message.trim()) {
             newErrors.message = 'Please provide details about your inquiry';
         }
 
-        // Format validation
+        // Validate email and phone formats
         if (formData.email && !validateEmail(formData.email)) {
             newErrors.email = 'Please enter a valid email address';
         }
@@ -386,7 +395,7 @@ export default function Contact() {
             newErrors.phone = 'Please enter a valid phone number';
         }
 
-        // Product requirements validation (only for sales)
+        // Product requirements validation (only for sales inquiries)
         if (formData.contactReason === 'sales') {
             if (productRequirements.length === 0) {
                 newErrors.products = 'At least one product is required';
@@ -421,7 +430,7 @@ export default function Contact() {
         }
     };
 
-    // Handle form submission
+    // Handle form submission and send data to backend
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -437,7 +446,7 @@ export default function Contact() {
         addNotification('info', 'Submitting your request...', 3000);
 
         try {
-            // Format data according to backend expectations
+            // Prepare data according to backend expectations
             const submissionData = {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
@@ -455,7 +464,7 @@ export default function Contact() {
 
             // Always use the Next.js API route; it will forward to the backend server-side
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout to allow cold starts
+            const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout for possible cold starts
             const response = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -473,13 +482,13 @@ export default function Contact() {
             setIsSubmitted(true);
             addNotification('success', 'Your request has been submitted successfully! We&rsquo;ll contact you within 24 hours.');
 
-            // Move focus to success message for screen readers
+            // Move focus to success message for accessibility/screen readers
             setTimeout(() => {
                 const success = document.getElementById('success-message');
                 success?.focus?.();
             }, 0);
 
-            // Reset form
+            // Reset form state after successful submission
             setFormData({
                 firstName: '',
                 lastName: '',
@@ -504,7 +513,7 @@ export default function Contact() {
                 errorMessage = error.message;
             }
 
-            // In development, show more detailed error information
+            // In production, show less detailed error information
             if (process.env.NODE_ENV === 'production') {
                 console.error('Detailed error:', error);
             }
@@ -528,7 +537,7 @@ export default function Contact() {
                 />
             </Head>
             
-            {/* Notification Container with aria-live */}
+            {/* Notification container with aria-live for accessibility */}
             <div className="notification-container" role="status" aria-live="polite" aria-atomic="true">
                 {notifications.map(notification => (
                     <div
@@ -559,7 +568,7 @@ export default function Contact() {
 
 
             <div className={`seen-contact-form-container ${backgroundLoaded ? 'background-loaded' : 'background-loading'}`}>
-                {/* Background Image */}
+                {/* Background image */}
                 <div className="seen-contact-background-image">
                     <Image
                         src="https://pub-8b25a422bd234ffab965d339ba7bc4aa.r2.dev/product-images/World%20map-09.jpg"
@@ -573,7 +582,7 @@ export default function Contact() {
                     />
                 </div>
                 
-                {/* Office Locations Section */}
+                {/* Office locations */}
                 <div className="seen-contact-offices-section">
                     <h2 className="seen-contact-offices-title">
                         <Icon name="icon-location" className="text-orange-500" size={20} />
@@ -582,7 +591,7 @@ export default function Contact() {
                     <div className="seen-contact-offices-grid">
 
 
-                    {/* Turkey Office */}
+                    {/* Turkey office */}
                     <div className="seen-contact-office-card">
                         <div className="seen-contact-office-header">
                             <div className="seen-contact-office-icon">
@@ -612,7 +621,7 @@ export default function Contact() {
                         </a>
                     </div>
 
-                    {/* Germany Office */}
+                    {/* Germany office */}
                     <div className="seen-contact-office-card">
                         <div className="seen-contact-office-header">
                             <div className="seen-contact-office-icon">
@@ -642,7 +651,7 @@ export default function Contact() {
                         </a>
                     </div>
 
-                    {/* UAE Office */}
+                    {/* UAE office */}
                     <div className="seen-contact-office-card">
                         <div className="seen-contact-office-header">
                             <div className="seen-contact-office-icon">
@@ -861,7 +870,7 @@ export default function Contact() {
                                 </div>
                             </div>
 
-                            {/* Contact Reason Section */}
+                            {/* Contact reason selection */}
                             <div className="seen-contact-form-section">
                                 <h2 className="seen-contact-section-title">
                                     <Icon name="icon-message" className="text-orange-500" size={16} />
@@ -893,7 +902,7 @@ export default function Contact() {
                                     {errors.contactReason && <div id="contactReason-error" className="seen-contact-error-message">{errors.contactReason}</div>}
                                 </div>
 
-                                {/* Conditional Message Field */}
+                                {/* Show message field when not a sales inquiry */}
                                 {formData.contactReason && formData.contactReason !== 'sales' && (
                                     <div className="seen-contact-form-group">
                                         <label htmlFor="message" className="seen-contact-form-label">
@@ -916,7 +925,7 @@ export default function Contact() {
                                 )}
                             </div>
 
-                            {/* Product Requirements Section - Only show for Sales */}
+                            {/* Product requirements section, only for sales inquiries */}
                             {formData.contactReason === 'sales' && (
                                 <div className="seen-contact-form-section">
                                     <h2 className="seen-contact-section-title">
@@ -924,7 +933,7 @@ export default function Contact() {
                                         {productData ? t('contact.product_inquiry') : t('contact.product_requirements')}
                                     </h2>
 
-                                    {/* Show context message when product is pre-selected */}
+                                    {/* Show context message if product is pre-selected */}
                                     {productData && (
                                         <p className="seen-contact-section-subtitle">
                                             You&apos;re inquiring about: <strong>{productData.name}</strong>
@@ -933,7 +942,7 @@ export default function Contact() {
                                         </p>
                                     )}
 
-                                    {/* Show help message for manual product input */}
+                                    {/* Show help message for manual product entry */}
                                     {!productData && (
                                         <p className="seen-contact-section-subtitle">
                                             <small>Please enter the product details manually. Include the product name, part number, manufacturer, and quantity for accurate quote processing. Price is optional.</small>
@@ -1043,7 +1052,7 @@ export default function Contact() {
                                             </tbody>
                                         </table>
 
-                                        {/* Add product button */}
+                                    {/* Button to add another product requirement row */}
                                         <div className="seen-contact-add-buttons">
                                             <button
                                                 type="button"
@@ -1061,19 +1070,17 @@ export default function Contact() {
                             )}
 
 
-                            {/* Submit Button */}
+                            {/* Submit button and Cloudflare Turnstile captcha */}
                             <div className="seen-contact-form-section">
-                                {/* Cloudflare Turnstile Captcha */}
-                                <div className="seen-contact-form-group">
-                                    <div
-                                        className="cf-turnstile"
-                                        data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
-                                        data-appearance="interaction-only"
-                                        data-callback="onTurnstileSuccess"
-                                        data-expired-callback="onTurnstileExpired"
-                                        data-error-callback="onTurnstileError"
-                                        aria-hidden="true"
-                                    />
+                                {/* Cloudflare Turnstile (captcha) */}
+                                <div className="p-4">
+                                    {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? (
+                                        <div ref={turnstileContainerRef} id="turnstile-container" />
+                                    ) : (
+                                        <p className="text-xs text-slate-400">Bot protection not configured (recommended).</p>
+                                    )}
+                                    {/* Hidden token field (redundant but harmless) */}
+                                    <input type="hidden" value={captchaToken ?? ''} />
                                 </div>
                                 <div className="seen-contact-submit-buttons">
                                     <button
@@ -1093,9 +1100,6 @@ export default function Contact() {
                                             {isSubmitting ? t('contact.submitting') : (isSubmitted ? t('contact.submitted') : t('contact.submit_request'))}
                                         </span>
                                     </button>
-                                    
-                                    {/* Reset Form Button - only show when there's data to reset */}
-                                   
                                 </div>
                             </div>
                         </form>
