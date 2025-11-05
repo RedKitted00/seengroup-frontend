@@ -71,19 +71,7 @@ export async function POST(request) {
       );
     }
 
-    // Optionally get client IP for verification policies
-    const ip = (request.headers.get('x-forwarded-for') || '')
-      .split(',')[0]
-      ?.trim();
-
-    // 1) Perform Turnstile verification (server-side)
-    const vt = await verifyTurnstile(captchaToken, ip);
-    if (!vt.ok) {
-      return NextResponse.json(
-        { success: false, error: 'Captcha verification misconfigured', detail: vt },
-        { status: 400 }
-      );
-    }
+    // (No server-side Turnstile verification: just forward token upstream)
 
     // 2) If verification succeeded, forward request to backend
     const controller = new AbortController();

@@ -149,6 +149,14 @@ export default function Contact() {
     const turnstileContainerRef = useRef<HTMLDivElement | null>(null);
     const turnstileWidgetIdRef = useRef<string | null>(null);
 
+    // Helper to safely reset Turnstile widget
+    const resetTurnstile = () => {
+      const id = turnstileWidgetIdRef.current;
+      if (id && window.turnstile?.reset) {
+        try { window.turnstile.reset(id); } catch {}
+      }
+    };
+
 
     // Parse product data from URL parameters and set API config for client-side
     useEffect(() => {
@@ -530,8 +538,16 @@ export default function Contact() {
 
             setErrors({ submit: errorMessage });
             addNotification('error', errorMessage);
+            // If captcha failed or timed out, reset widget to issue a fresh token
+            if (String(errorMessage).toLowerCase().includes('captcha')) {
+                resetTurnstile();
+                setCaptchaToken(null);
+            }
         } finally {
             setIsSubmitting(false);
+            if (!isSubmitted) {
+                resetTurnstile();
+            }
         }
     };
 
