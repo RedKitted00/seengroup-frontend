@@ -251,7 +251,7 @@ export default function Contact() {
             try {
                 const id = window.turnstile.render(turnstileContainerRef.current, {
                     sitekey: siteKey,
-                    theme: 'auto',
+                    theme: 'light',
                     callback: (token: string) => setCaptchaToken(token),
                     'expired-callback': () => setCaptchaToken(null),
                     'error-callback': () => setCaptchaToken(null)

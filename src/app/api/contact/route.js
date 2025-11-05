@@ -3,8 +3,9 @@ import { NextResponse } from 'next/server';
 
 
 const resolveBackendUrl = () => {
-  const url = process.env.NEXT_PUBLIC_BACKEND_URL;
-  return url && url.trim().length > 0 ? url.trim() : '';
+  const raw = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+  const url = raw.trim().replace(/\/+$/, '');
+  return url;
 };
 
 /**
@@ -50,6 +51,15 @@ export async function POST(request) {
         { status: 500 }
       );
     }
+    // Guard against forwarding to the same Next.js origin (would recurse)
+    const reqOrigin = new URL(request.url).origin;
+    if (backendUrl && backendUrl.startsWith(reqOrigin)) {
+      console.error('[contact api] Misconfiguration: NEXT_PUBLIC_BACKEND_URL points to this frontend origin', { backendUrl, reqOrigin });
+      return NextResponse.json(
+        { success: false, error: 'Misconfigured NEXT_PUBLIC_BACKEND_URL. It must point to your upstream API, not this frontend.' },
+        { status: 500 }
+      );
+    }
     const body = await request.json();
     const { captchaToken, ...rest } = body || {};
 
@@ -76,18 +86,39 @@ export async function POST(request) {
     }
 
     // 2) If verification succeeded, forward request to backend
-    const forwardResp = await fetch(`${backendUrl}/api/contact`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      // Forward captchaToken to backend if required
-      body: JSON.stringify({ captchaToken, ...rest })
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    let forwardResp;
+    try {
+      forwardResp = await fetch(`${backendUrl}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // Forward captchaToken to backend if required
+        body: JSON.stringify({ captchaToken, ...rest }),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      console.error('[contact api] Upstream fetch failed', { err, backendUrl });
+      return NextResponse.json(
+        { success: false, error: 'Upstream service unreachable' },
+        { status: 503 }
+      );
+    } finally {
+      clearTimeout(timeout);
+    }
 
     // Expect JSON from backend; if parsing fails, wrap as text
     let data;
     const text = await forwardResp.text();
     try { data = JSON.parse(text); } catch { data = { success: forwardResp.ok, message: text }; }
-
+    if (!forwardResp.ok) {
+      console.error('[contact api] Upstream responded with error', {
+        status: forwardResp.status,
+        statusText: forwardResp.statusText,
+        body: text?.slice(0, 500),
+        backendUrl
+      });
+    }
     return NextResponse.json(data, { status: forwardResp.status });
   } catch (error) {
     console.error('Contact form submission error:', error);
