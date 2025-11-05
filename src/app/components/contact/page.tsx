@@ -488,7 +488,7 @@ export default function Contact() {
 
             // Always use the Next.js API route; it will forward to the backend server-side
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout for possible cold starts
+            const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for possible cold starts
             const response = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

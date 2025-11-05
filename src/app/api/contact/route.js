@@ -41,30 +41,47 @@ export async function POST(request) {
 
     // (No server-side Turnstile verification: just forward token upstream)
 
-    // 2) If verification succeeded, forward request to backend
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
+    // Upstream timeout/retries can be tuned via env: CONTACT_UPSTREAM_TIMEOUT_MS, CONTACT_UPSTREAM_RETRIES
+    const TIMEOUT_MS = Number(process.env.CONTACT_UPSTREAM_TIMEOUT_MS || 45000);
+    const RETRIES = Number(process.env.CONTACT_UPSTREAM_RETRIES || 2);
+
+    // 2) If verification succeeded, forward request to backend with retry/timeout
     let forwardResp;
-    try {
-      forwardResp = await fetch(`${backendUrl}/api/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Origin': reqOrigin,
-          'Referer': `${reqOrigin}/contact`,
-          ...(clientIP ? { 'X-Forwarded-For': clientIP } : {})
-        },
-        body: JSON.stringify({ captchaToken, ...rest }),
-        signal: controller.signal,
-      });
-    } catch (err) {
-      console.error('[contact api] Upstream fetch failed', { err, backendUrl });
-      return NextResponse.json(
-        { success: false, error: 'Upstream service unreachable' },
-        { status: 503 }
-      );
-    } finally {
-      clearTimeout(timeout);
+    let lastErr;
+    for (let attempt = 0; attempt <= RETRIES; attempt++) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+      try {
+        forwardResp = await fetch(`${backendUrl}/api/contact`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Origin': reqOrigin,
+            'Referer': `${reqOrigin}/contact`,
+            ...(clientIP ? { 'X-Forwarded-For': clientIP } : {})
+          },
+          body: JSON.stringify({ captchaToken, ...rest }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeout);
+        break; // success
+      } catch (err) {
+        clearTimeout(timeout);
+        lastErr = err;
+        const isAbort = err && (err.name === 'AbortError' || err.code === 20);
+        console.error('[contact api] Upstream fetch attempt failed', { attempt, isAbort, err });
+        if (attempt === RETRIES) {
+          const status = isAbort ? 504 : 503;
+          const msg = isAbort ? 'Upstream timed out' : 'Upstream service unreachable';
+          return NextResponse.json(
+            { success: false, error: msg },
+            { status }
+          );
+        }
+        // exponential backoff before next attempt
+        const delay = 500 * Math.pow(2, attempt);
+        await new Promise(res => setTimeout(res, delay));
+      }
     }
 
     // Prefer JSON; if not JSON, return a safe JSON envelope with sliced text/HTML
