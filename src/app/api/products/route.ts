@@ -13,9 +13,7 @@ export async function GET(req: NextRequest) {
 
     // Call the real backend API
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-    console.log('Backend URL:', backendUrl);
     const fullUrl = `${backendUrl}/api/products?${backendParams.toString()}`;
-    console.log('Full API URL:', fullUrl);
     const response = await fetch(fullUrl);
     
     if (!response.ok) {
@@ -23,11 +21,9 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await response.json();
-    console.log('Backend response data:', data);
     
     // Handle backend response - extract data and remove pagination if present
     if (data.success && data.data) {
-      console.log('Successfully fetched products:', data.data.length);
       return NextResponse.json({
         success: true,
         data: data.data
