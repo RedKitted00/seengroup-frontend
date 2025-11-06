@@ -12,6 +12,7 @@ export async function POST(request) {
         const name = formData.get('name');
         const email = formData.get('email');
         const resume = formData.get('resume');   
+        const coverLetter = formData.get('coverLetter');   
         const jobId = formData.get('jobId');
         const phone = formData.get('phone');
         const message = formData.get('message');
@@ -67,6 +68,7 @@ export async function POST(request) {
         backendFormData.append('name', name);
         backendFormData.append('email', email);
         backendFormData.append('resume', resume);
+        backendFormData.append('coverLetter', coverLetter);
         if (jobId) backendFormData.append('jobId', jobId);
         if (phone) backendFormData.append('phone', phone);
         if (message) backendFormData.append('message', message);
