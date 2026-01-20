@@ -111,7 +111,7 @@ interface Application {
 export default function CareerManagement() {
   // Performance monitoring
   const { trackApiCall, trackUserAction, trackError } = useAdminPerformance('Career Management');
-  
+
   // Predefined options for skills and benefits
   const skillOptions = [
     'JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular', 'Node.js', 'Python', 'Java', 'C#', 'PHP',
@@ -135,7 +135,7 @@ export default function CareerManagement() {
     'Commuter Benefits', 'Parking', 'Transportation', 'Relocation Assistance',
     'Tuition Reimbursement', 'Student Loan Assistance', 'Childcare Support', 'Pet-friendly Office'
   ];
-  
+
   const [activeTab, setActiveTab] = useState<string | null>('jobs');
 
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -146,7 +146,7 @@ export default function CareerManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [applicationsPage, setApplicationsPage] = useState(1);
   const [pageSize] = useState(10);
-  
+
   // Advanced filtering state
   const [jobFilters, setJobFilters] = useState({
     search: '',
@@ -158,7 +158,7 @@ export default function CareerManagement() {
     sortOrder: 'desc'
   });
   // Removed jobPagination - now using frontend pagination
-  
+
   // Job modal state
   const [jobModalOpen, setJobModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
@@ -180,6 +180,18 @@ export default function CareerManagement() {
     isActive: true
   });
 
+  const canJobSubmit =
+    jobForm.title.trim() &&
+    jobForm.description.trim() &&
+    jobForm.type &&
+    jobForm.requirements.trim() &&
+    jobForm.location.trim() &&
+    jobForm.department.trim() &&
+    jobForm.salary.trim() &&
+    jobForm.responsibilities.trim() &&
+    jobForm.postedDate;
+
+
   // Application modal state
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
@@ -196,7 +208,7 @@ export default function CareerManagement() {
     setLoading(true);
     try {
       const startTime = performance.now();
-      
+
       // Build query parameters (no pagination - fetch all jobs)
       const params = new URLSearchParams({
         ...(filters.search && { search: filters.search }),
@@ -211,19 +223,19 @@ export default function CareerManagement() {
       const response = await fetch(`/api/admin/career/jobs?${params}`, {
         credentials: 'include',
       });
-      
+
       const endTime = performance.now();
       const loadTime = endTime - startTime;
-      
+
       // Track API call performance
       trackApiCall(false, loadTime);
-      
+
       if (response.ok) {
         const data = await response.json();
-        
+
         // Store all jobs for frontend pagination
         setJobs(data.data || []);
-        
+
         // Log performance metrics
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -254,7 +266,7 @@ export default function CareerManagement() {
       const response = await fetch(`/api/admin/career/applications`, {
         credentials: 'include',
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setApplications(data.data?.applications || []);
@@ -290,11 +302,11 @@ export default function CareerManagement() {
 
       // Get the filename from the response headers
       const contentDisposition = response.headers.get('content-disposition');
-      
+
       // Clean the applicant name for filename
       const cleanName = cleanNameForFilename(applicantName);
       let filename = `${cleanName}_resume.pdf`;
-      
+
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/);
         if (filenameMatch) {
@@ -338,7 +350,7 @@ export default function CareerManagement() {
   const downloadCoverLetter = async (applicationId: string, applicantName: string) => {
     try {
       trackUserAction('Download Cover Letter', true);
-      
+
       const response = await fetch(`/api/admin/career/applications/${applicationId}/cover-letter`);
 
       if (!response.ok) {
@@ -347,11 +359,11 @@ export default function CareerManagement() {
       }
 
       const contentDisposition = response.headers.get('content-disposition');
-      
+
       // Clean the applicant name for filename
       const cleanName = cleanNameForFilename(applicantName);
       let filename = `${cleanName}_cover_letter.pdf`;
-      
+
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/);
         if (filenameMatch) {
@@ -495,53 +507,47 @@ export default function CareerManagement() {
 
   const saveJob = async () => {
     // Enhanced validation
-    if (!jobForm.title.trim()) {
-      notifications.show({
-        title: 'Validation Error',
-        message: 'Job title is required',
-        color: 'red',
-      });
-      return;
+    const requiredFields: Array<[keyof typeof jobForm, string]> = [
+      ['title', 'Job title is required'],
+      ['description', 'Job description is required'],
+      ['type', 'Job type is required'],
+      ['requirements', 'Requirements is required'],
+      ['location', 'Location is required'],
+      ['department', 'Department is required'],
+      ['salary', 'Salary is required'],
+      ['responsibilities', 'Responsibilities is required'],
+      ['postedDate', 'Posted date is required'],
+    ];
+
+    for (const [key, msg] of requiredFields) {
+      const value = jobForm[key];
+      if (typeof value === 'string' && !value.trim()) {
+        notifications.show({ title: 'Validation Error', message: msg, color: 'red' });
+        return;
+      }
     }
 
-    if (!jobForm.description.trim()) {
-      notifications.show({
-        title: 'Validation Error',
-        message: 'Job description is required',
-        color: 'red',
-      });
-      return;
-    }
-
-    if (!jobForm.type) {
-      notifications.show({
-        title: 'Validation Error',
-        message: 'Job type is required',
-        color: 'red',
-      });
-      return;
-    }
 
     setLoading(true);
     try {
       const startTime = performance.now();
-      
-      const url = editingJob 
-        ? `/api/admin/career/jobs/${editingJob.id}` 
+
+      const url = editingJob
+        ? `/api/admin/career/jobs/${editingJob.id}`
         : `/api/admin/career/jobs`;
       const method = editingJob ? 'PUT' : 'POST';
-      
+
       // Prepare job data with proper formatting
       const jobData = {
         ...jobForm,
         title: jobForm.title.trim(),
         description: jobForm.description.trim(),
-        requirements: jobForm.requirements?.trim() || null,
-        location: jobForm.location?.trim() || null,
-        department: jobForm.department?.trim() || null,
-        salary: jobForm.salary?.trim() || null,
-        responsibilities: jobForm.responsibilities?.trim() || null,
-        postedDate: jobForm.postedDate || null,
+        requirements: jobForm.requirements?.trim(),
+        location: jobForm.location?.trim(),
+        department: jobForm.department?.trim(),
+        salary: jobForm.salary?.trim(),
+        responsibilities: jobForm.responsibilities?.trim(),
+        postedDate: jobForm.postedDate,
         skills: (jobForm.skills || []).filter(skill => skill.trim()),
         benefits: (jobForm.benefits || []).filter(benefit => benefit.trim()),
         ...(editingJob && { id: editingJob.id })
@@ -572,7 +578,7 @@ export default function CareerManagement() {
       } else {
         const errorData = await response.json();
         trackError('save_job');
-        
+
         // Handle validation errors from backend
         if (errorData.details && Array.isArray(errorData.details)) {
           const validationErrors = errorData.details.map((detail: { msg: string }) => detail.msg).join(', ');
@@ -610,7 +616,7 @@ export default function CareerManagement() {
     setLoading(true);
     try {
       const startTime = performance.now();
-      
+
       const response = await fetch(`/api/admin/career/jobs/${jobId}`, {
         method: 'DELETE',
         credentials: 'include',
@@ -675,8 +681,8 @@ export default function CareerManagement() {
         body: JSON.stringify({ status }),
       });
 
-        if (response.ok) {
-          notifications.show({
+      if (response.ok) {
+        notifications.show({
           title: 'Success',
           message: 'Application status updated successfully',
           color: 'green',
@@ -684,7 +690,7 @@ export default function CareerManagement() {
         await loadApplications();
       } else {
         const errorData = await response.json();
-          notifications.show({
+        notifications.show({
           title: 'Error',
           message: errorData.error || 'Failed to update application status',
           color: 'red',
@@ -797,7 +803,7 @@ export default function CareerManagement() {
     }
   };
 
-  
+
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -933,8 +939,8 @@ export default function CareerManagement() {
           <Card withBorder p="md" bg="dark.6">
             <Group justify="space-between" mb="md">
               <Title order={3} c="white">Job Listings</Title>
-              <Button 
-                leftSection={<IconPlus size={16} />} 
+              <Button
+                leftSection={<IconPlus size={16} />}
                 color="brand"
                 onClick={openCreateJob}
               >
@@ -991,7 +997,7 @@ export default function CareerManagement() {
                   onChange={(value) => handleFilterChange('status', value || 'active')}
                 />
               </SimpleGrid>
-              
+
               <Group justify="space-between" mt="md">
                 <Group>
                   <Select
@@ -1031,84 +1037,84 @@ export default function CareerManagement() {
             <ClientOnly>
               <Grid>
                 {paginatedJobs.map((job) => (
-                <Grid.Col key={job.id} span={{ base: 12, md: 6, lg: 4 }}>
-                  <Card withBorder p="md" bg="dark.5">
-                    <Group justify="space-between" mb="xs">
-                      <Badge color={job.isActive ? 'green' : 'red'} variant="light">
-                        {job.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
-                      <Menu>
-                        <Menu.Target>
-                          <ActionIcon variant="subtle" color="gray">
-                            <IconEdit size={16} />
-                          </ActionIcon>
-                        </Menu.Target>
-                        <Menu.Dropdown>
-                          <Menu.Item 
-                            leftSection={<IconEye size={16} />}
-                            onClick={() => openJobDetails(job)}
-                          >
-                            View Details
-                          </Menu.Item>
-                          <Menu.Item 
-                            leftSection={<IconEdit size={16} />}
-                            onClick={() => openEditJob(job)}
-                          >
-                            Edit Job
-                          </Menu.Item>
-                          <Menu.Item 
-                            leftSection={<IconTrash size={16} />}
-                            color="red"
-                            onClick={() => openJobDeleteConfirm(job)}
-                          >
-                            Archive Job
-                          </Menu.Item>
-                        </Menu.Dropdown>
-                      </Menu>
-                    </Group>
+                  <Grid.Col key={job.id} span={{ base: 12, md: 6, lg: 4 }}>
+                    <Card withBorder p="md" bg="dark.5">
+                      <Group justify="space-between" mb="xs">
+                        <Badge color={job.isActive ? 'green' : 'red'} variant="light">
+                          {job.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                        <Menu>
+                          <Menu.Target>
+                            <ActionIcon variant="subtle" color="gray">
+                              <IconEdit size={16} />
+                            </ActionIcon>
+                          </Menu.Target>
+                          <Menu.Dropdown>
+                            <Menu.Item
+                              leftSection={<IconEye size={16} />}
+                              onClick={() => openJobDetails(job)}
+                            >
+                              View Details
+                            </Menu.Item>
+                            <Menu.Item
+                              leftSection={<IconEdit size={16} />}
+                              onClick={() => openEditJob(job)}
+                            >
+                              Edit Job
+                            </Menu.Item>
+                            <Menu.Item
+                              leftSection={<IconTrash size={16} />}
+                              color="red"
+                              onClick={() => openJobDeleteConfirm(job)}
+                            >
+                              Archive Job
+                            </Menu.Item>
+                          </Menu.Dropdown>
+                        </Menu>
+                      </Group>
 
-                    <Title order={4} mb="xs" c="white">{job.title}</Title>
-                    
-                    <Group gap="xs" mb="xs">
-                      <Badge variant="light" size="sm">
-                        <IconBuilding size={12} style={{ marginRight: 4 }} />
-                        {job.department || 'â€”'}
-                      </Badge>
-                      <Badge variant="light" size="sm">
-                        <IconMapPin size={12} style={{ marginRight: 4 }} />
-                        {job.location}
-                      </Badge>
-                    </Group>
+                      <Title order={4} mb="xs" c="white">{job.title}</Title>
 
-                    <Group gap="xs" mb="md">
-                      <Badge variant="light" size="sm">
-                        <IconClock size={12} style={{ marginRight: 4 }} />
-                        {job.type}
-                      </Badge>
-                      <Badge variant="light" size="sm">
-                        <IconCurrencyDollar size={12} style={{ marginRight: 4 }} />
-                        {job.salary || 'â€”'}
-                      </Badge>
-                    </Group>
+                      <Group gap="xs" mb="xs">
+                        <Badge variant="light" size="sm">
+                          <IconBuilding size={12} style={{ marginRight: 4 }} />
+                          {job.department || 'â€”'}
+                        </Badge>
+                        <Badge variant="light" size="sm">
+                          <IconMapPin size={12} style={{ marginRight: 4 }} />
+                          {job.location}
+                        </Badge>
+                      </Group>
 
-                    <Text size="sm" c="dimmed" mb="md" lineClamp={2}>
-                      {job.description}
-                    </Text>
+                      <Group gap="xs" mb="md">
+                        <Badge variant="light" size="sm">
+                          <IconClock size={12} style={{ marginRight: 4 }} />
+                          {job.type}
+                        </Badge>
+                        <Badge variant="light" size="sm">
+                          <IconCurrencyDollar size={12} style={{ marginRight: 4 }} />
+                          {job.salary || 'â€”'}
+                        </Badge>
+                      </Group>
 
-                    <Group justify="space-between">
-                      <Text size="xs" c="dimmed">
-                        {job.applicationsCount || 0} applications
+                      <Text size="sm" c="dimmed" mb="md" lineClamp={2}>
+                        {job.description}
                       </Text>
-                      <Switch
-                        checked={job.isActive}
-                        onChange={() => { /* handleJobToggle(job.id); */ }}
-                        size="sm"
-                      />
-                    </Group>
-                  </Card>
-                </Grid.Col>
-              ))}
-            </Grid>
+
+                      <Group justify="space-between">
+                        <Text size="xs" c="dimmed">
+                          {job.applicationsCount || 0} applications
+                        </Text>
+                        <Switch
+                          checked={job.isActive}
+                          onChange={() => { /* handleJobToggle(job.id); */ }}
+                          size="sm"
+                        />
+                      </Group>
+                    </Card>
+                  </Grid.Col>
+                ))}
+              </Grid>
             </ClientOnly>
 
             {paginatedJobs.length === 0 && totalJobs === 0 && (
@@ -1165,180 +1171,180 @@ export default function CareerManagement() {
                 <Button variant="light" color="brand" leftSection={<IconRefresh size={16} />} onClick={refreshData}>
                   Refresh
                 </Button>
-                
+
               </Group>
             </Group>
 
             <ScrollArea>
               <ClientOnly>
                 <Table>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Applicant</Table.Th>
-                    <Table.Th>Position</Table.Th>
-                    <Table.Th>Status</Table.Th>
-                    <Table.Th>Resume</Table.Th>
-                    <Table.Th>Cover Letter</Table.Th>
-                    <Table.Th>Submitted</Table.Th>
-                    <Table.Th>Actions</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {paginatedApplications.map((application) => (
-                    
-                    <Table.Tr key={application.id}>
-                      <Table.Td>
-                        <Group>
-                          <Avatar size="sm" color="blue">
-                            {application.name.split(' ').map(n => n[0]).join('')}
-                          </Avatar>
-                          <div>
-                            <Text fw={500} size="sm">{application.name}</Text>
-                            <Text size="xs" c="dimmed">{application.email}</Text>
-                            {application.phone && (
-                              <Text size="xs" c="dimmed">{application.phone}</Text>
-                            )}
-                          </div>
-                        </Group>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm">{application.job?.title}</Text>
-                        {/* {application.jobTitle && (
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Applicant</Table.Th>
+                      <Table.Th>Position</Table.Th>
+                      <Table.Th>Status</Table.Th>
+                      <Table.Th>Resume</Table.Th>
+                      <Table.Th>Cover Letter</Table.Th>
+                      <Table.Th>Submitted</Table.Th>
+                      <Table.Th>Actions</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {paginatedApplications.map((application) => (
+
+                      <Table.Tr key={application.id}>
+                        <Table.Td>
+                          <Group>
+                            <Avatar size="sm" color="blue">
+                              {application.name.split(' ').map(n => n[0]).join('')}
+                            </Avatar>
+                            <div>
+                              <Text fw={500} size="sm">{application.name}</Text>
+                              <Text size="xs" c="dimmed">{application.email}</Text>
+                              {application.phone && (
+                                <Text size="xs" c="dimmed">{application.phone}</Text>
+                              )}
+                            </div>
+                          </Group>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm">{application.job?.title}</Text>
+                          {/* {application.jobTitle && (
                           <Text size="xs" c="dimmed">for {application.jobTitle}</Text>
                         )} */}
-                      </Table.Td>
-                      <Table.Td>
-                        <Badge 
-                          color={getStatusColor(application.status)}
-                          leftSection={getStatusIcon(application.status)}
-                        >
-                          {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                        </Badge>
-                      </Table.Td>
-                      <Table.Td>
-                        <Group gap="xs">
-                          <IconFileText size={16} />
-                          <div>
-                            <Text size="sm">
-                              {application.resumeUrl ? 
-                                `${application.name}_resume.pdf` : 
-                                'N/A'
-                              }
-                            </Text>
-                            <Text size="xs" c="dimmed">
-                              {application.resumeUrl ? 'Click download to get file' : 'No resume uploaded'}
-                            </Text>
-                          </div>
-                        </Group>
-                      </Table.Td>
-                      <Table.Td>
-                        <Group gap="xs">
-                          <IconFileText size={16} />
-                          <div>
-                            {application.coverLetter && isCoverLetterUrl(application.coverLetter) ? (
-                              <>
-                                <Text size="sm">
-                                  {getCoverLetterFileName(application.coverLetter) || 'cover_letter.pdf'}
-                                </Text>
-                                <Text size="xs" c="dimmed">PDF file - Click download</Text>
-                              </>
-                            ) : (
-                              <>
-                                <Text size="sm">N/A</Text>
-                                <Text size="xs" c="dimmed">No cover letter</Text>
-                              </>
-                            )}
-                          </div>
-                        </Group>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm">{formatDate(application.createdAt)}</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Group gap="xs">
-                          <Tooltip label="View Details">
-                            <ActionIcon 
-                              variant="light" 
-                              color="brand"
-                              onClick={() => openApplicationDetails(application)}
-                            >
-                              <IconEye size={16} />
-                            </ActionIcon>
-                          </Tooltip>
-                          <Tooltip label="Download Resume">
-                            <ActionIcon 
-                              variant="light" 
-                              color="green"
-                              onClick={() => downloadResume(application.id, application.name)}
-                            >
-                              <IconDownload size={16} />
-                            </ActionIcon>
-                          </Tooltip>
-                          {application.coverLetter && isCoverLetterUrl(application.coverLetter) && (
-                            <Tooltip label="Download Cover Letter">
-                              <ActionIcon 
-                                variant="light" 
-                                color="blue"
-                                onClick={() => downloadCoverLetter(application.id, application.name)}
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge
+                            color={getStatusColor(application.status)}
+                            leftSection={getStatusIcon(application.status)}
+                          >
+                            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          <Group gap="xs">
+                            <IconFileText size={16} />
+                            <div>
+                              <Text size="sm">
+                                {application.resumeUrl ?
+                                  `${application.name}_resume.pdf` :
+                                  'N/A'
+                                }
+                              </Text>
+                              <Text size="xs" c="dimmed">
+                                {application.resumeUrl ? 'Click download to get file' : 'No resume uploaded'}
+                              </Text>
+                            </div>
+                          </Group>
+                        </Table.Td>
+                        <Table.Td>
+                          <Group gap="xs">
+                            <IconFileText size={16} />
+                            <div>
+                              {application.coverLetter && isCoverLetterUrl(application.coverLetter) ? (
+                                <>
+                                  <Text size="sm">
+                                    {getCoverLetterFileName(application.coverLetter) || 'cover_letter.pdf'}
+                                  </Text>
+                                  <Text size="xs" c="dimmed">PDF file - Click download</Text>
+                                </>
+                              ) : (
+                                <>
+                                  <Text size="sm">N/A</Text>
+                                  <Text size="xs" c="dimmed">No cover letter</Text>
+                                </>
+                              )}
+                            </div>
+                          </Group>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm">{formatDate(application.createdAt)}</Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Group gap="xs">
+                            <Tooltip label="View Details">
+                              <ActionIcon
+                                variant="light"
+                                color="brand"
+                                onClick={() => openApplicationDetails(application)}
                               >
-                                <IconFileText size={16} />
+                                <IconEye size={16} />
                               </ActionIcon>
                             </Tooltip>
-                          )}
-                          <Menu>
-                            <Menu.Target>
-                              <ActionIcon variant="light" color="gray">
-                                <IconEdit size={16} />
+                            <Tooltip label="Download Resume">
+                              <ActionIcon
+                                variant="light"
+                                color="green"
+                                onClick={() => downloadResume(application.id, application.name)}
+                              >
+                                <IconDownload size={16} />
                               </ActionIcon>
-                            </Menu.Target>
-                            <Menu.Dropdown>
-                              <Menu.Label>Change Status</Menu.Label>
-                              <Menu.Item 
-                                leftSection={<IconClock size={16} />}
-                                onClick={() => updateApplicationStatus(application.id, 'pending')}
-                              >
-                                Mark as Pending
-                              </Menu.Item>
-                              <Menu.Item 
-                                leftSection={<IconEye size={16} />}
-                                onClick={() => updateApplicationStatus(application.id, 'reviewed')}
-                              >
-                                Mark as Reviewed
-                              </Menu.Item>
-                              <Menu.Item 
-                                leftSection={<IconStar size={16} />}
-                                onClick={() => updateApplicationStatus(application.id, 'shortlisted')}
-                              >
-                                Shortlist
-                              </Menu.Item>
-                              <Menu.Item 
-                                leftSection={<IconCheck size={16} />}
-                                onClick={() => updateApplicationStatus(application.id, 'approved')}
-                              >
-                                Mark as Hired
-                              </Menu.Item>
-                              <Menu.Item 
-                                leftSection={<IconX size={16} />}
-                                color="red"
-                                onClick={() => updateApplicationStatus(application.id, 'rejected')}
-                              >
-                                Reject
-                              </Menu.Item>
-                              <Menu.Item 
-                                leftSection={<IconTrash size={16} />}
-                                color="red"
-                                onClick={() => openApplicationDeleteConfirm(application)}
-                              >
-                                Delete Application
-                              </Menu.Item>
-                            </Menu.Dropdown>
-                          </Menu>
-                        </Group>
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
+                            </Tooltip>
+                            {application.coverLetter && isCoverLetterUrl(application.coverLetter) && (
+                              <Tooltip label="Download Cover Letter">
+                                <ActionIcon
+                                  variant="light"
+                                  color="blue"
+                                  onClick={() => downloadCoverLetter(application.id, application.name)}
+                                >
+                                  <IconFileText size={16} />
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+                            <Menu>
+                              <Menu.Target>
+                                <ActionIcon variant="light" color="gray">
+                                  <IconEdit size={16} />
+                                </ActionIcon>
+                              </Menu.Target>
+                              <Menu.Dropdown>
+                                <Menu.Label>Change Status</Menu.Label>
+                                <Menu.Item
+                                  leftSection={<IconClock size={16} />}
+                                  onClick={() => updateApplicationStatus(application.id, 'pending')}
+                                >
+                                  Mark as Pending
+                                </Menu.Item>
+                                <Menu.Item
+                                  leftSection={<IconEye size={16} />}
+                                  onClick={() => updateApplicationStatus(application.id, 'reviewed')}
+                                >
+                                  Mark as Reviewed
+                                </Menu.Item>
+                                <Menu.Item
+                                  leftSection={<IconStar size={16} />}
+                                  onClick={() => updateApplicationStatus(application.id, 'shortlisted')}
+                                >
+                                  Shortlist
+                                </Menu.Item>
+                                <Menu.Item
+                                  leftSection={<IconCheck size={16} />}
+                                  onClick={() => updateApplicationStatus(application.id, 'approved')}
+                                >
+                                  Mark as Hired
+                                </Menu.Item>
+                                <Menu.Item
+                                  leftSection={<IconX size={16} />}
+                                  color="red"
+                                  onClick={() => updateApplicationStatus(application.id, 'rejected')}
+                                >
+                                  Reject
+                                </Menu.Item>
+                                <Menu.Item
+                                  leftSection={<IconTrash size={16} />}
+                                  color="red"
+                                  onClick={() => openApplicationDeleteConfirm(application)}
+                                >
+                                  Delete Application
+                                </Menu.Item>
+                              </Menu.Dropdown>
+                            </Menu>
+                          </Group>
+                        </Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
               </ClientOnly>
             </ScrollArea>
 
@@ -1360,7 +1366,7 @@ export default function CareerManagement() {
             )}
           </Card>
         </Tabs.Panel>
-        
+
 
       </Tabs>
 
@@ -1403,9 +1409,9 @@ export default function CareerManagement() {
                 {selectedApplication.coverLetter && isCoverLetterUrl(selectedApplication.coverLetter) ? (
                   <Group>
                     <Text size="sm">PDF Cover Letter: {getCoverLetterFileName(selectedApplication.coverLetter) || 'cover_letter.pdf'}</Text>
-                    <Button 
-                      size="xs" 
-                      variant="light" 
+                    <Button
+                      size="xs"
+                      variant="light"
                       leftSection={<IconDownload size={14} />}
                       onClick={() => downloadCoverLetter(selectedApplication.coverLetter!, selectedApplication.name)}
                     >
@@ -1421,8 +1427,8 @@ export default function CareerManagement() {
             <Divider />
 
             <Group>
-              <Button 
-                leftSection={<IconDownload size={16} />} 
+              <Button
+                leftSection={<IconDownload size={16} />}
                 variant="light"
                 onClick={() => downloadResume(selectedApplication.id, selectedApplication.name)}
               >
@@ -1550,7 +1556,7 @@ export default function CareerManagement() {
               <IconFileText size={18} />
               <Text fw={600} size="sm" tt="uppercase" c="dimmed">Basic Information</Text>
             </Group>
-            
+
             <Grid>
               <Grid.Col span={{ base: 12, md: 8 }}>
                 <TextInput
@@ -1585,19 +1591,23 @@ export default function CareerManagement() {
             <Grid>
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <TextInput
+                  required
                   label="Department"
                   placeholder="e.g., Engineering, Marketing, Sales"
                   value={jobForm.department}
                   onChange={(e) => setJobForm(prev => ({ ...prev, department: e.target.value }))}
+                  error={!jobForm.department.trim() ? 'Department is required' : null}
                   leftSection={<IconBuilding size={16} />}
                 />
               </Grid.Col>
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <TextInput
+                  required
                   label="Location"
                   placeholder="e.g., Remote, New York, London"
                   value={jobForm.location}
                   onChange={(e) => setJobForm(prev => ({ ...prev, location: e.target.value }))}
+                  error={!jobForm.location.trim() ? 'Location is required' : null}
                   leftSection={<IconMapPin size={16} />}
                 />
               </Grid.Col>
@@ -1606,19 +1616,23 @@ export default function CareerManagement() {
             <Grid>
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <TextInput
+                  required
                   label="Salary Range"
                   placeholder="e.g., $120,000 - $150,000 or Competitive"
                   value={jobForm.salary}
                   onChange={(e) => setJobForm(prev => ({ ...prev, salary: e.target.value }))}
+                  error={!jobForm.salary.trim() ? 'Salary is required' : null}
                   leftSection={<IconCurrencyDollar size={16} />}
                 />
               </Grid.Col>
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <TextInput
+                  required
                   label="Posted Date"
                   type="date"
                   value={jobForm.postedDate}
                   onChange={(e) => setJobForm(prev => ({ ...prev, postedDate: e.target.value }))}
+                  error={!jobForm.postedDate ? 'Posted date is required' : null}
                   leftSection={<IconCalendar size={16} />}
                 />
               </Grid.Col>
@@ -1648,10 +1662,12 @@ export default function CareerManagement() {
             <Grid>
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <Textarea
+                  required
                   label="Key Responsibilities"
                   placeholder="• Lead development of new features&#10;• Mentor junior developers&#10;• Collaborate with cross-functional teams"
                   value={jobForm.responsibilities}
                   onChange={(e) => setJobForm(prev => ({ ...prev, responsibilities: e.target.value }))}
+                  error={!jobForm.responsibilities.trim() ? 'Responsibilities is required' : null}
                   rows={3}
                   autosize
                   minRows={2}
@@ -1660,10 +1676,12 @@ export default function CareerManagement() {
               </Grid.Col>
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <Textarea
+                  required
                   label="Requirements & Qualifications"
                   placeholder="• Bachelor's degree in Computer Science&#10;• 5+ years of experience&#10;• Strong problem-solving skills"
                   value={jobForm.requirements}
                   onChange={(e) => setJobForm(prev => ({ ...prev, requirements: e.target.value }))}
+                  error={!jobForm.requirements.trim() ? 'Requirements is required' : null}
                   rows={3}
                   autosize
                   minRows={2}
@@ -1702,9 +1720,9 @@ export default function CareerManagement() {
                       const input = e.target as HTMLInputElement;
                       const customSkill = input.value.trim();
                       if (customSkill && !jobForm.skills.includes(customSkill)) {
-                        setJobForm(prev => ({ 
-                          ...prev, 
-                          skills: [...prev.skills, customSkill] 
+                        setJobForm(prev => ({
+                          ...prev,
+                          skills: [...prev.skills, customSkill]
                         }));
                         input.value = '';
                       }
@@ -1734,9 +1752,9 @@ export default function CareerManagement() {
                       const input = e.target as HTMLInputElement;
                       const customBenefit = input.value.trim();
                       if (customBenefit && !jobForm.benefits.includes(customBenefit)) {
-                        setJobForm(prev => ({ 
-                          ...prev, 
-                          benefits: [...prev.benefits, customBenefit] 
+                        setJobForm(prev => ({
+                          ...prev,
+                          benefits: [...prev.benefits, customBenefit]
                         }));
                         input.value = '';
                       }
@@ -1750,17 +1768,17 @@ export default function CareerManagement() {
 
           {/* Form Actions */}
           <Group justify="space-between" mt="lg">
-            <Button 
-              variant="light" 
+            <Button
+              variant="light"
               onClick={() => setJobModalOpen(false)}
               leftSection={<IconX size={16} />}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={saveJob}
               leftSection={<IconCheck size={16} />}
-              disabled={!jobForm.title.trim() || !jobForm.description.trim()}
+              disabled={!canJobSubmit}
               loading={loading}
             >
               {editingJob ? 'Update Job' : 'Create Job'}
@@ -1773,15 +1791,15 @@ export default function CareerManagement() {
       <Modal opened={jobConfirmOpen} onClose={() => setJobConfirmOpen(false)} title="Confirm Archive Job" centered>
         <Stack>
           <Alert color="orange" icon={<IconTrash size={16} />}>
-            Are you sure you want to archive the job <strong>&quot;{jobToDelete?.title}&quot;</strong>? 
+            Are you sure you want to archive the job <strong>&quot;{jobToDelete?.title}&quot;</strong>?
             <Text size="sm" mt="xs">
               This will hide the job from public listings but preserve all application data. You can reactivate it later.
             </Text>
           </Alert>
           <Group justify="flex-end">
             <Button variant="light" onClick={() => setJobConfirmOpen(false)}>Cancel</Button>
-            <Button 
-              color="orange" 
+            <Button
+              color="orange"
               onClick={() => {
                 if (jobToDelete) {
                   deleteJob(jobToDelete.id);
@@ -1800,15 +1818,15 @@ export default function CareerManagement() {
       <Modal opened={applicationConfirmOpen} onClose={() => setApplicationConfirmOpen(false)} title="Confirm Delete Application" centered>
         <Stack>
           <Alert color="red" icon={<IconTrash size={16} />}>
-            Are you sure you want to delete the application from <strong>&quot;{applicationToDelete?.name}&quot;</strong> for the job <strong>&quot;{applicationToDelete?.job?.title}&quot;</strong>? 
+            Are you sure you want to delete the application from <strong>&quot;{applicationToDelete?.name}&quot;</strong> for the job <strong>&quot;{applicationToDelete?.job?.title}&quot;</strong>?
             <Text size="sm" mt="xs">
               This action cannot be undone.
             </Text>
           </Alert>
           <Group justify="flex-end">
             <Button variant="light" onClick={() => setApplicationConfirmOpen(false)}>Cancel</Button>
-            <Button 
-              color="red" 
+            <Button
+              color="red"
               onClick={() => {
                 if (applicationToDelete) {
                   deleteApplication(applicationToDelete.id);
