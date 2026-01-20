@@ -48,6 +48,7 @@ import {
   IconClock,
   IconCurrencyDollar,
   IconFileText,
+  IconHistory,
   IconCheck,
   IconX,
   IconSearch,
@@ -612,6 +613,51 @@ export default function CareerManagement() {
     setJobConfirmOpen(true);
   };
 
+  const toggleArchiveJob = async (jobId: string, isActive: boolean) => {
+    setLoading(true);
+    try {
+      const startTime = performance.now();
+
+      const response = await fetch(`/api/admin/career/jobs`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: jobId, isActive: !isActive }),
+      });
+
+      const endTime = performance.now();
+      const t = endTime - startTime;
+
+      if (response.ok) {
+        trackUserAction(isActive ? 'archive_job' : 'unarchive_job', true, t);
+        notifications.show({
+          title: 'Success',
+          message: isActive ? 'Job archived successfully' : 'Job unarchived successfully',
+          color: 'green',
+        });
+        await loadJobs();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        trackError(isActive ? 'archive_job' : 'unarchive_job');
+        notifications.show({
+          title: 'Error',
+          message: errorData.message || errorData.error || 'Failed to update job status',
+          color: 'red',
+        });
+      }
+    } catch {
+      trackError(isActive ? 'archive_job' : 'unarchive_job');
+      notifications.show({
+        title: 'Error',
+        message: 'Network error updating job status',
+        color: 'red',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   const deleteJob = async (jobId: string) => {
     setLoading(true);
     try {
@@ -1063,12 +1109,21 @@ export default function CareerManagement() {
                               Edit Job
                             </Menu.Item>
                             <Menu.Item
+                              leftSection={<IconHistory size={16} />}
+                              color={job.isActive ? 'blue' : 'green'}
+                              onClick={() => toggleArchiveJob(job.id, job.isActive)}
+                            >
+                              {job.isActive ? 'Archive Job' : 'Unarchive Job'}
+                            </Menu.Item>
+
+                            {/* <Menu.Item
                               leftSection={<IconTrash size={16} />}
                               color="red"
                               onClick={() => openJobDeleteConfirm(job)}
                             >
-                              Archive Job
-                            </Menu.Item>
+                              Delete Job
+                            </Menu.Item> */}
+
                           </Menu.Dropdown>
                         </Menu>
                       </Group>
@@ -1107,8 +1162,26 @@ export default function CareerManagement() {
                         </Text>
                         <Switch
                           checked={job.isActive}
-                          onChange={() => { /* handleJobToggle(job.id); */ }}
+                          onClick={() => toggleArchiveJob(job.id, job.isActive)}
                           size="sm"
+                          styles={(theme) => ({
+                            root: {
+                              cursor: 'pointer',
+                            },
+                            track: {
+                              cursor: 'pointer',
+                              backgroundColor: job.isActive
+                                ? theme.colors.blue[6]
+                                : theme.colors.gray[5],
+                              borderColor: job.isActive
+                                ? theme.colors.blue[6]
+                                : theme.colors.gray[5],
+                              transition: 'all 150ms ease'
+                            },
+                            thumb: {
+                              cursor: 'pointer',
+                            },
+                          })}
                         />
                       </Group>
                     </Card>
@@ -1782,33 +1855,6 @@ export default function CareerManagement() {
               loading={loading}
             >
               {editingJob ? 'Update Job' : 'Create Job'}
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
-
-      {/* Job Archive Confirmation Modal */}
-      <Modal opened={jobConfirmOpen} onClose={() => setJobConfirmOpen(false)} title="Confirm Archive Job" centered>
-        <Stack>
-          <Alert color="orange" icon={<IconTrash size={16} />}>
-            Are you sure you want to archive the job <strong>&quot;{jobToDelete?.title}&quot;</strong>?
-            <Text size="sm" mt="xs">
-              This will hide the job from public listings but preserve all application data. You can reactivate it later.
-            </Text>
-          </Alert>
-          <Group justify="flex-end">
-            <Button variant="light" onClick={() => setJobConfirmOpen(false)}>Cancel</Button>
-            <Button
-              color="orange"
-              onClick={() => {
-                if (jobToDelete) {
-                  deleteJob(jobToDelete.id);
-                  setJobConfirmOpen(false);
-                }
-              }}
-              loading={loading}
-            >
-              Archive Job
             </Button>
           </Group>
         </Stack>
