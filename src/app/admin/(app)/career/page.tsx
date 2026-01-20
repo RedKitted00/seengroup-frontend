@@ -1018,7 +1018,7 @@ export default function CareerManagement() {
                       { value: 'desc', label: 'Descending' },
                       { value: 'asc', label: 'Ascending' }
                     ]}
-                    value={jobFilters.sortBy}
+                    value={jobFilters.sortOrder}
                     onChange={(value) => handleFilterChange('sortOrder', value || 'desc')}
                     w={120}
                   />
