@@ -30,7 +30,8 @@ import {
   TextInput,
   Select,
   MultiSelect,
-  Textarea
+  Textarea,
+  Checkbox
 } from '@mantine/core';
 
 import {
@@ -196,6 +197,12 @@ export default function CareerManagement() {
   // Application modal state
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+
+  // Application Bulk Delete state
+  const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const bulkDeleteDisabled = selectedApplicationIds.length === 0 || loading;
+
 
   // Confirmation modals state
   const [jobConfirmOpen, setJobConfirmOpen] = useState(false);
@@ -657,7 +664,6 @@ export default function CareerManagement() {
     }
   };
 
-
   const deleteJob = async (jobId: string) => {
     setLoading(true);
     try {
@@ -786,6 +792,78 @@ export default function CareerManagement() {
       notifications.show({
         title: 'Error',
         message: 'Network error deleting application',
+        color: 'red',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Applications Bulk Delete Operations
+  const pageApplicationIds = paginatedApplications.map(a => a.id);
+  const allOnPageSelected =
+    pageApplicationIds.length > 0 &&
+    pageApplicationIds.every(id => selectedApplicationIds.includes(id));
+
+  const toggleSelectAllOnPage = (checked: boolean) => {
+    setSelectedApplicationIds(prev => {
+      if (checked) {
+        const set = new Set([...prev, ...pageApplicationIds]);
+        return Array.from(set);
+      }
+      // unselect only current page ids
+      return prev.filter(id => !pageApplicationIds.includes(id));
+    });
+  };
+
+  const toggleSelectOne = (id: string, checked: boolean) => {
+    setSelectedApplicationIds(prev => {
+      if (checked) return Array.from(new Set([...prev, id]));
+      return prev.filter(x => x !== id);
+    });
+  };
+
+
+  const deleteApplicationsBulk = async () => {
+    if (selectedApplicationIds.length === 0) return;
+
+    setLoading(true);
+    try {
+      const ids = [...selectedApplicationIds];
+
+      let successCount = 0;
+      let failCount = 0;
+
+      // Sequential delete to avoid rate limit / overload
+      for (const id of ids) {
+        const r = await fetch(`/api/admin/career/applications/${id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+
+        if (r.ok) {
+          successCount += 1;
+        } else {
+          failCount += 1;
+        }
+      }
+
+      notifications.show({
+        title: 'Bulk delete completed',
+        message:
+          failCount === 0
+            ? `${successCount} application(s) deleted successfully.`
+            : `${successCount} deleted, ${failCount} failed.`,
+        color: failCount === 0 ? 'green' : 'yellow',
+      });
+
+      setSelectedApplicationIds([]); // clear selection
+      setBulkDeleteOpen(false);
+      await loadApplications();
+    } catch (e) {
+      notifications.show({
+        title: 'Error',
+        message: 'Network error while deleting applications',
         color: 'red',
       });
     } finally {
@@ -1257,6 +1335,15 @@ export default function CareerManagement() {
                 <Button variant="light" color="brand" leftSection={<IconRefresh size={16} />} onClick={refreshData}>
                   Refresh
                 </Button>
+                <Button
+                  variant="light"
+                  color="red"
+                  leftSection={<IconTrash size={16} />}
+                  disabled={bulkDeleteDisabled}
+                  onClick={() => setBulkDeleteOpen(true)}
+                >
+                  Delete Selected ({selectedApplicationIds.length})
+                </Button>
 
               </Group>
             </Group>
@@ -1266,6 +1353,16 @@ export default function CareerManagement() {
                 <Table>
                   <Table.Thead>
                     <Table.Tr>
+                      <Table.Th>
+                        <Checkbox
+                          checked={allOnPageSelected}
+                          indeterminate={
+                            selectedApplicationIds.some(id => pageApplicationIds.includes(id)) &&
+                            !allOnPageSelected
+                          }
+                          onChange={(e) => toggleSelectAllOnPage(e.currentTarget.checked)}
+                        />
+                      </Table.Th>
                       <Table.Th>Applicant</Table.Th>
                       <Table.Th>Position</Table.Th>
                       <Table.Th>Status</Table.Th>
@@ -1279,6 +1376,12 @@ export default function CareerManagement() {
                     {paginatedApplications.map((application) => (
 
                       <Table.Tr key={application.id}>
+                        <Table.Td>
+                          <Checkbox
+                            checked={selectedApplicationIds.includes(application.id)}
+                            onChange={(e) => toggleSelectOne(application.id, e.currentTarget.checked)}
+                          />
+                        </Table.Td>
                         <Table.Td>
                           <Group>
                             <Avatar size="sm" color="blue">
@@ -1527,6 +1630,31 @@ export default function CareerManagement() {
           </Stack>
         )}
       </Modal>
+
+      {/* Applications Bulk Delete Confirmation Modal */}
+      <Modal
+        opened={bulkDeleteOpen}
+        onClose={() => setBulkDeleteOpen(false)}
+        title="Confirm Bulk Delete"
+        centered
+      >
+        <Stack>
+          <Alert color="red" icon={<IconTrash size={16} />}>
+            You are about to permanently delete <strong>{selectedApplicationIds.length}</strong> application(s).
+            <Text size="sm" mt="xs">This action cannot be undone.</Text>
+          </Alert>
+
+          <Group justify="flex-end">
+            <Button variant="light" onClick={() => setBulkDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={deleteApplicationsBulk} loading={loading}>
+              Delete Selected
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
 
       {/* Email Compose Modal */}
       <Modal
