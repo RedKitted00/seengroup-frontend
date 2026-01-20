@@ -180,7 +180,7 @@ export default function CareerManagement() {
     isActive: true
   });
 
-  const canJobSubmit =
+  const canJobSubmit = Boolean(
     jobForm.title.trim() &&
     jobForm.description.trim() &&
     jobForm.type &&
@@ -189,8 +189,8 @@ export default function CareerManagement() {
     jobForm.department.trim() &&
     jobForm.salary.trim() &&
     jobForm.responsibilities.trim() &&
-    jobForm.postedDate;
-
+    jobForm.postedDate
+  );
 
   // Application modal state
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
