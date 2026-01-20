@@ -1413,7 +1413,7 @@ export default function CareerManagement() {
                       size="xs"
                       variant="light"
                       leftSection={<IconDownload size={14} />}
-                      onClick={() => downloadCoverLetter(selectedApplication.coverLetter!, selectedApplication.name)}
+                      onClick={() => downloadCoverLetter(selectedApplication.id, selectedApplication.name)}
                     >
                       Download
                     </Button>
