@@ -672,27 +672,27 @@ export default function CareerManagement() {
       const deleteTime = endTime - startTime;
 
       if (response.ok) {
-        trackUserAction('archive_job', true, deleteTime);
+        trackUserAction('delete_job', true, deleteTime);
         notifications.show({
           title: 'Success',
-          message: 'Job archived successfully',
+          message: 'Job deleted successfully',
           color: 'green',
         });
         await loadJobs();
       } else {
         const errorData = await response.json();
-        trackError('archive_job');
+        trackError('delete_job');
         notifications.show({
           title: 'Error',
-          message: errorData.error || 'Failed to archive job',
+          message: errorData.error || 'Failed to delete job',
           color: 'red',
         });
       }
     } catch {
-      trackError('archive_job');
+      trackError('delete_job');
       notifications.show({
         title: 'Error',
-        message: 'Network error archiving job',
+        message: 'Network error deleting job',
         color: 'red',
       });
     } finally {
@@ -1116,13 +1116,26 @@ export default function CareerManagement() {
                               {job.isActive ? 'Archive Job' : 'Unarchive Job'}
                             </Menu.Item>
 
-                            {/* <Menu.Item
-                              leftSection={<IconTrash size={16} />}
-                              color="red"
-                              onClick={() => openJobDeleteConfirm(job)}
+                            <Tooltip
+                              label={
+                                (job.applicationsCount || 0) > 0
+                                  ? 'Jobs with applications cannot be deleted. Please archive instead.'
+                                  : 'Permanently delete this job'
+                              }
+                              disabled={(job.applicationsCount || 0) === 0}
                             >
-                              Delete Job
-                            </Menu.Item> */}
+                              <div>
+                                <Menu.Item
+                                  leftSection={<IconTrash size={16} />}
+                                  color="red"
+                                  disabled={(job.applicationsCount || 0) > 0}
+                                  onClick={() => openJobDeleteConfirm(job)}
+                                >
+                                  Delete Job
+                                </Menu.Item>
+                              </div>
+                            </Tooltip>
+
 
                           </Menu.Dropdown>
                         </Menu>
@@ -1886,6 +1899,59 @@ export default function CareerManagement() {
           </Group>
         </Stack>
       </Modal>
+
+      {/* Job Delete Confirmation Modal */}
+      <Modal
+        opened={jobConfirmOpen}
+        onClose={() => {
+          setJobConfirmOpen(false);
+          setJobToDelete(null);
+        }}
+        title="Confirm Delete Job"
+        centered
+      >
+        <Stack>
+          <Alert color="red" icon={<IconTrash size={16} />}>
+            Are you sure you want to permanently delete{' '}
+            <strong>&quot;{jobToDelete?.title}&quot;</strong>?
+            <Text size="sm" mt="xs">
+              This action cannot be undone.
+            </Text>
+
+            {!!jobToDelete?.applicationsCount && jobToDelete.applicationsCount > 0 && (
+              <Text size="sm" mt="xs" c="red">
+                This job has {jobToDelete.applicationsCount} application(s). The backend may block deletion.
+              </Text>
+            )}
+          </Alert>
+
+          <Group justify="flex-end">
+            <Button
+              variant="light"
+              onClick={() => {
+                setJobConfirmOpen(false);
+                setJobToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              color="red"
+              onClick={() => {
+                if (!jobToDelete) return;
+                deleteJob(jobToDelete.id);
+                setJobConfirmOpen(false);
+                setJobToDelete(null);
+              }}
+              loading={loading}
+            >
+              Delete Job
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
     </Container>
   );
 }
